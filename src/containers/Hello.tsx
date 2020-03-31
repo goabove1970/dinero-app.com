@@ -2,11 +2,12 @@ import Hello from '../components/Hello';
 import * as actions from '../actions/';
 import { StoreState } from '../types/index';
 import { connect, Dispatch } from 'react-redux';
+import { Props } from '../components/Props';
 
-export function mapStateToProps({ enthusiasmLevel, languageName }: StoreState) {
+export function mapStateToProps(props: StoreState): Props {
   return {
-    enthusiasmLevel,
-    name: languageName,
+    activeAccount: props.activeAccount,
+    userId: props.activeUser,
   };
 }
 
@@ -17,4 +18,4 @@ export function mapDispatchToProps(dispatch: Dispatch<actions.EnthusiasmAction>)
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Hello);
+export default connect(mapStateToProps /*mapDispatchToProps*/)(Hello);

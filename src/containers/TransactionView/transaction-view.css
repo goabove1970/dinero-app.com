@@ -1,0 +1,12 @@
+.transaction-content {
+  top: 0;
+  height: 100%;
+  text-align: left;
+
+  font-size: 16px;
+}
+
+.transaction-content .sub-title {
+  font-size: 80%;
+  color: rgba(152, 152, 152, 0.8);
+}
