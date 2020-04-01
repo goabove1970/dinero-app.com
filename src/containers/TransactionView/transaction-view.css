@@ -10,3 +10,51 @@
   font-size: 80%;
   color: rgba(152, 152, 152, 0.8);
 }
+
+.demo-container {
+  display: flex;
+  justify-content: center;
+  height: 450px;
+}
+
+#app {
+  align-self: center;
+}
+
+.buttons-demo {
+  width: 600px;
+  align-self: center;
+}
+
+.buttons-column > .column-header {
+  flex-grow: 0;
+  width: 150px;
+  height: 35px;
+  font-size: 130%;
+  opacity: 0.6;
+  text-align: left;
+  padding-left: 15px;
+}
+
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* .buttons > div {
+  width: 150px;
+  flex-wrap: nowrap;
+  display: flex;
+} */
+
+.buttons-column > div {
+  /* width: 140px; */
+  height: 50px;
+  text-align: center;
+}
+
+.buttons-column {
+  width: 115px;
+  justify-content: center;
+}
