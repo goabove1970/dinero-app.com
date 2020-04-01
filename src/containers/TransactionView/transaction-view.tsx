@@ -90,13 +90,14 @@ export enum TransactionIntervalType {
   threeMonths,
   sixMonths,
   twelveMonths,
+  all,
 }
 
 export interface TransactionIntervalSelectionOption {
   intervalType: TransactionIntervalType;
   caption: string;
-  startDate: Date;
-  endDate: Date;
+  startDate?: Date;
+  endDate?: Date;
 }
 
 const buildTransactionIntervalOption = (
@@ -155,11 +156,16 @@ const buildTransactionIntervalOption = (
     }
 
     default:
-      return undefined;
+      // all
+      return {
+        intervalType,
+        caption: 'All',
+      };
   }
 };
 
 const intervalButtons = [
+  TransactionIntervalType.all,
   TransactionIntervalType.thisMonth,
   TransactionIntervalType.lastMonth,
   TransactionIntervalType.threeMonths,
@@ -169,7 +175,7 @@ const intervalButtons = [
 
 const renderButtonsRow = (selectedInterval: TransactionIntervalType, onClick: any) => {
   return (
-    <div className="buttons-demo">
+    <div className="interval-buttons-row">
       <div className="buttons">
         {intervalButtons.map(button => {
           return (
@@ -177,7 +183,7 @@ const renderButtonsRow = (selectedInterval: TransactionIntervalType, onClick: an
               <div className="buttons-column">
                 <div>
                   <Button
-                    width={110}
+                    //                    width={110}
                     text={button!.caption}
                     type={selectedInterval === button!.intervalType ? 'default' : 'normal'}
                     stylingMode="contained"
@@ -204,7 +210,7 @@ export class TransactionViewElement extends React.Component<TransactionViewProps
     super(props);
     console.log(`constructing DataGridElement for transactions from account '${props.accountId}'`);
     this.state = {
-      selectedIntervalType: TransactionIntervalType.thisMonth,
+      selectedIntervalType: TransactionIntervalType.all,
     };
     this.onClick = this.onClick.bind(this);
   }
