@@ -7,16 +7,18 @@ import { Props } from './Props';
 import TreeView from 'devextreme-react/tree-view';
 import CustomStore from 'devextreme/data/custom_store';
 import * as http from 'http';
+import BusinessViewElement from '../containers/BusinessView';
 
 export enum TreeMenuItemType {
   Transactions,
   Accounts,
   Categories,
   SubCategories,
+  Businesses,
 }
 
 export interface MainMenyItem {
-  id: string;
+  // id: string;
   text: string;
   expanded: boolean;
   element: TreeMenuItemType;
@@ -24,21 +26,30 @@ export interface MainMenyItem {
 }
 
 const categoriesMenuItem = {
-  id: '2',
+  // id: '2',
   text: 'Categories',
   expanded: false,
   element: TreeMenuItemType.Categories,
   items: [],
 };
 
+const businessesMenuItem = {
+  // id: '3',
+  text: 'Businesses',
+  expanded: false,
+  element: TreeMenuItemType.Businesses,
+  items: [],
+};
+
 export const menuItemsSource: MainMenyItem[] = [
   {
-    id: '1',
+    // id: '1',
     text: 'Transactions',
     expanded: false,
     element: TreeMenuItemType.Transactions,
   },
   categoriesMenuItem,
+  businessesMenuItem,
 ];
 
 interface category {
@@ -150,7 +161,7 @@ export class Hello extends React.Component<Props, MainMenuState> {
   };
 
   render() {
-    console.log(`Rendering... state: ${JSON.stringify(this.state, null, 4)}`);
+    // console.log(`Rendering... state: ${JSON.stringify(this.state, null, 4)}`);
     const userId = this.props.userId;
     if (!this.customStore) {
       this.customStore = {
@@ -174,7 +185,6 @@ export class Hello extends React.Component<Props, MainMenuState> {
             selectByClick={true}
             onItemSelectionChanged={this.handleTreeViewSelectionChange}
             dataSource={this.customStore}
-            //selectedItem={this.state.selectedMenuItem}
           />
         </div>
         <div className="right-content">{this.renderTreeContent()}</div>
@@ -191,6 +201,8 @@ export class Hello extends React.Component<Props, MainMenuState> {
           return <TransactionViewElement accountId={this.props.activeAccount} />;
         case TreeMenuItemType.Categories:
           return <CategoryViewElement userId={this.props.userId} />;
+        case TreeMenuItemType.Businesses:
+          return <BusinessViewElement accountId={this.props.activeAccount} />;
       }
     }
     return undefined;
