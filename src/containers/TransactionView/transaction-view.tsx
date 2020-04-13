@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import 'devextreme/data/odata/store';
-import DataGrid, { Column, Paging, Pager } from 'devextreme-react/data-grid';
+import DataGrid, { Column, Paging, Editing, Pager, Lookup } from 'devextreme-react/data-grid';
 import 'whatwg-fetch';
 import './transaction-view.css';
 import notify from 'devextreme/ui/notify';
@@ -17,6 +17,7 @@ import {
   TransactionCategorizationSelectionOption,
   renderCategorizationButtonsRow,
 } from './categorization';
+import { buildCategoriesDataSource } from '../../dataSources/categoriesDataSource';
 
 export interface TransactionViewProps {
   accountId?: string;
@@ -82,13 +83,23 @@ export class TransactionViewElement extends React.Component<TransactionViewProps
           selection={{ mode: 'single' }}
           hoverStateEnabled={true}
         >
+          <Editing mode="row" allowUpdating={true} allowAdding={true}></Editing>
           <Paging defaultPageSize={10} />
           <Pager showPageSizeSelector={true} allowedPageSizes={[5, 10, 20, 100]} showInfo={true} />
           {/* <Column dataField={'transactionId'} caption="Transaction ID" /> */}
-          <Column dataField={'chaseTransaction.PostingDate'} caption="Posting Date" />
+
+          <Column dataField={'chaseTransaction.PostingDate'} caption="Posting Date" dataType="date" width={95} />
           <Column dataField={'chaseTransaction.Description'} caption="Description" />
-          <Column dataField={'chaseTransaction.Amount'} caption="Amount" />
-          <Column dataField={'chaseTransaction.Balance'} caption="Balance" />
+
+          <Column dataField={'categoryId'} caption="Category" dataType="string" width={100}>
+            <Lookup
+              dataSource={buildCategoriesDataSource(this.props.accountId)}
+              valueExpr="categoryId"
+              displayExpr="caption"
+            />
+          </Column>
+          <Column dataField={'chaseTransaction.Amount'} caption="Amount" width={80} />
+          <Column dataField={'chaseTransaction.Balance'} caption="Balance" width={80} />
         </DataGrid>
       </div>
     );
