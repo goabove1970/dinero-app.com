@@ -68,8 +68,8 @@ function topLevelCategoriesNodes(
   items?: any[];
 }[] {
   return cats
-    .filter(c => c.parentCategoryId === undefined)
-    .map(c => {
+    .filter((c) => c.parentCategoryId === undefined)
+    .map((c) => {
       return {
         text: c.caption,
         expanded: false,
@@ -81,7 +81,7 @@ function topLevelCategoriesNodes(
 const categoriesReadDataSource = (userId?: string) => {
   return {
     store: new CustomStore({
-      load: function(loadOptions) {
+      load: function (loadOptions) {
         const reqBody = {
           action: 'read',
           args: userId
@@ -106,7 +106,7 @@ const categoriesReadDataSource = (userId?: string) => {
         console.log(`request options: ${JSON.stringify(options, null, 4)}`);
 
         return new Promise((resolve, reject) => {
-          const req = http.request(options, res => {
+          const req = http.request(options, (res) => {
             let buffer: Buffer;
             res.on('data', (chunk: Buffer) => {
               if (!buffer) {
@@ -117,7 +117,7 @@ const categoriesReadDataSource = (userId?: string) => {
             });
 
             res.on('end', () => {
-              console.info(`Response: ${buffer}`);
+              // console.info(`Response: ${buffer}`);
               const data = JSON.parse(buffer.toString());
               const topLevel = topLevelCategoriesNodes(data.payload.categories);
               console.log(JSON.stringify(topLevel, null, 4));
@@ -125,7 +125,7 @@ const categoriesReadDataSource = (userId?: string) => {
             });
           });
 
-          req.on('error', err => {
+          req.on('error', (err) => {
             console.error(`Error: ${err.message || err}`);
             reject(err);
           });
@@ -166,9 +166,9 @@ export class Hello extends React.Component<Props, MainMenuState> {
     if (!this.customStore) {
       this.customStore = {
         store: new CustomStore({
-          load: function(loadOptions) {
+          load: function (loadOptions) {
             const categoriesStore = categoriesReadDataSource(userId);
-            return categoriesStore.store.load().then(items => {
+            return categoriesStore.store.load().then((items) => {
               categoriesMenuItem.items = items;
               return menuItemsSource;
             });
@@ -198,7 +198,7 @@ export class Hello extends React.Component<Props, MainMenuState> {
     if (menuItem) {
       switch (menuItem.element) {
         case TreeMenuItemType.Transactions:
-          return <TransactionViewElement accountId={this.props.activeAccount} />;
+          return <TransactionViewElement accountId={this.props.activeAccount} userId={this.props.userId} />;
         case TreeMenuItemType.Categories:
           return <CategoryViewElement userId={this.props.userId} />;
         case TreeMenuItemType.Businesses:

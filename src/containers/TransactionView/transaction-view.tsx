@@ -6,6 +6,7 @@ import 'whatwg-fetch';
 import './transaction-view.css';
 import notify from 'devextreme/ui/notify';
 import { buildTransactionDataSource } from './transactionDataSource';
+import ContextMenu from 'devextreme-react/context-menu';
 import {
   TransactionIntervalType,
   TransactionIntervalSelectionOption,
@@ -18,9 +19,18 @@ import {
   renderCategorizationButtonsRow,
 } from './categorization';
 import { buildCategoriesDataSource } from '../../dataSources/categoriesDataSource';
+import CustomStore from 'devextreme/data/custom_store';
+import {
+  buildTransactionContextMenuDataSource,
+  ContextMenuItem,
+  TransactionContextMenuItemType,
+} from './transactionContextMenuDataSource';
+import DevExpress from 'devextreme/bundles/dx.all';
+import { category, categoryTreeNode } from '../../contracts/categoryTreeNode';
 
 export interface TransactionViewProps {
   accountId?: string;
+  userId?: string;
 }
 
 export interface TransactionViewState {
@@ -28,7 +38,22 @@ export interface TransactionViewState {
   selectedCategorizationType: TransactionCategorizationType;
 }
 
+const categoryReadTransformation = (loadedCategories: category[]): categoryTreeNode[] => {
+  return loadedCategories.map((c: category) => {
+    return {
+      caption: c.caption,
+      categoryId: c.categoryId,
+      key: c.categoryId,
+      items: [],
+    };
+  });
+};
+
 export class TransactionViewElement extends React.Component<TransactionViewProps, TransactionViewState> {
+  categoriesStore: { store: CustomStore };
+  transactionsStore: { store: CustomStore };
+  selectedRowData: any;
+
   constructor(props: TransactionViewProps) {
     super(props);
     console.log(`constructing DataGridElement for transactions from account '${props.accountId}'`);
@@ -38,6 +63,10 @@ export class TransactionViewElement extends React.Component<TransactionViewProps
     };
     this.onTransactionIntervalChanged = this.onTransactionIntervalChanged.bind(this);
     this.onTransactionCategorizationChanged = this.onTransactionCategorizationChanged.bind(this);
+    this.itemClick = this.itemClick.bind(this);
+    this.contextMenuPerparing = this.contextMenuPerparing.bind(this);
+    this.contectContentReady = this.contectContentReady.bind(this);
+    this.contextMenuShowing = this.contextMenuShowing.bind(this);
   }
 
   onTransactionIntervalChanged(e: any) {
@@ -58,30 +87,74 @@ export class TransactionViewElement extends React.Component<TransactionViewProps
     });
   }
 
+  itemClick(e: any) {
+    console.log(`itemClick: ${JSON.stringify(e.itemData, null, 4)}`);
+
+    if (
+      this.selectedRowData &&
+      this.selectedRowData.row &&
+      this.selectedRowData.row.data &&
+      this.selectedRowData.row.data.transactionId
+    ) {
+      const categoryId: string = e.itemData.id;
+      const transactionId = this.selectedRowData.row.data.transactionId;
+      console.log(`Moving transaction ${transactionId} to category ${categoryId}`);
+      this.transactionsStore.store
+        .update(transactionId, {
+          categoryId,
+        })
+        .then(() => {
+          if (this.selectedRowData && this.selectedRowData.component) {
+            console.log(`Refreshing component...`);
+            this.selectedRowData.component.refresh();
+          }
+        });
+    }
+  }
+
+  contectContentReady(e: any) {
+    console.log(`contectContentReady, e.model: ${JSON.stringify(e.model, null, 4)}`);
+    console.log(`contectContentReady, e.component.items: ${JSON.stringify(e.component.items, null, 4)}`);
+  }
+
+  contextMenuShowing(e: any) {
+    // console.log(`contextMenuShowing, e.component: ${JSON.stringify(e.component, null, 4)}`);
+    // e.component;
+  }
+
+  contextMenuPerparing(e: any) {
+    // console.log(`contextMenuPerparing, e.row.data: ${JSON.stringify(e.row.data, null, 4)}`);
+    this.selectedRowData = e;
+  }
+
   render(): JSX.Element {
-    console.log('rendering DataGridElement');
     const intervalOption = buildTransactionIntervalOption(this.state.selectedIntervalType);
+    this.categoriesStore = buildCategoriesDataSource(this.props.userId, categoryReadTransformation);
+    this.transactionsStore = buildTransactionDataSource({
+      startDate: intervalOption!.startDate,
+      endDate: intervalOption!.endDate,
+      categorization: this.state.selectedCategorizationType,
+    });
+    const categoriesContextMenu = buildTransactionContextMenuSource(this.props.userId);
     return (
       <div className="transaction-content">
         <div>
           <b>Transactions</b>
           <div className="sub-title">
             <div>Transactions for account {this.props.accountId}</div>
+            <div>Transactions for user {this.props.userId}</div>
           </div>
         </div>
         {renderIntervalButtonsRow(this.state.selectedIntervalType, this.onTransactionIntervalChanged)}
         {renderCategorizationButtonsRow(this.state.selectedCategorizationType, this.onTransactionCategorizationChanged)}
         <DataGrid
-          dataSource={buildTransactionDataSource({
-            startDate: intervalOption!.startDate,
-            endDate: intervalOption!.endDate,
-            categorization: this.state.selectedCategorizationType,
-          })}
+          dataSource={this.transactionsStore}
           columnAutoWidth={true}
           showBorders={true}
           showRowLines={true}
           selection={{ mode: 'single' }}
           hoverStateEnabled={true}
+          onContextMenuPreparing={this.contextMenuPerparing}
         >
           <Editing mode="row" allowUpdating={true} allowAdding={true}></Editing>
           <Paging defaultPageSize={10} />
@@ -92,18 +165,49 @@ export class TransactionViewElement extends React.Component<TransactionViewProps
           <Column dataField={'chaseTransaction.Description'} caption="Description" />
 
           <Column dataField={'categoryId'} caption="Category" dataType="string" width={100}>
-            <Lookup
-              dataSource={buildCategoriesDataSource(this.props.accountId)}
-              valueExpr="categoryId"
-              displayExpr="caption"
-            />
+            <Lookup dataSource={this.categoriesStore} valueExpr="categoryId" displayExpr="caption" />
           </Column>
           <Column dataField={'chaseTransaction.Amount'} caption="Amount" width={80} />
           <Column dataField={'chaseTransaction.Balance'} caption="Balance" width={80} />
         </DataGrid>
+        <ContextMenu
+          dataSource={categoriesContextMenu}
+          width={200}
+          target=".dx-data-row"
+          onItemClick={this.itemClick}
+          onContentReady={this.contectContentReady}
+          onShowing={this.contextMenuShowing}
+        />
       </div>
     );
   }
+}
+
+export class TransactionContextMenuSource {
+  store: CustomStore;
+}
+
+function buildTransactionContextMenuSource(userId?: string): TransactionContextMenuSource {
+  const loadCategoriesSource = buildTransactionContextMenuDataSource(userId);
+
+  const source: TransactionContextMenuSource = {
+    store: new CustomStore({
+      load: function (e: any): Promise<any> {
+        return loadCategoriesSource.store.load().then((categories: ContextMenuItem[]) => {
+          const newMenu: ContextMenuItem[] = [];
+          newMenu.push({
+            text: 'Hide Transaction',
+            id: 'hide_unhide',
+            itemType: TransactionContextMenuItemType.hideUnhide,
+          });
+          categories.forEach((c) => newMenu.push(c));
+          return newMenu;
+        });
+      },
+    }),
+  };
+
+  return source;
 }
 
 export default TransactionViewElement;

@@ -78,7 +78,7 @@ export function buildTreeShape(cats: category[]): categoryTreeNode[] {
   return tree;
 }
 
-export const buildCategoriesDataSource = (userId?: string) => {
+export const buildCategoriesDataSource = (userId?: string, readTransformation?: (cats: category[]) => any[]) => {
   return {
     store: new CustomStore({
       key: 'categoryId',
@@ -118,7 +118,7 @@ export const buildCategoriesDataSource = (userId?: string) => {
             });
 
             res.on('end', () => {
-              console.info(`Response: ${buffer}`);
+              // console.info(`Response: ${buffer}`);
               const data = JSON.parse(buffer.toString());
               if (data.payload.categories && data.payload.categories.length) {
                 resolve(data.payload.categories[0]);
@@ -139,14 +139,12 @@ export const buildCategoriesDataSource = (userId?: string) => {
         });
       },
 
-      load: function (loadOptions) {
+      load: function (loadOptions: any) {
         const reqBody = {
           action: 'read',
-          args: userId
-            ? {
-                userId,
-              }
-            : {},
+          args: {
+            userId,
+          },
         };
         const bodyString = JSON.stringify(reqBody);
 
@@ -161,7 +159,7 @@ export const buildCategoriesDataSource = (userId?: string) => {
           },
         };
 
-        console.log(`request options: ${JSON.stringify(options, null, 4)}`);
+        // console.log(`category request options: ${JSON.stringify(options, null, 4)}`);
 
         return new Promise((resolve, reject) => {
           const req = http.request(options, (res) => {
@@ -175,11 +173,14 @@ export const buildCategoriesDataSource = (userId?: string) => {
             });
 
             res.on('end', () => {
-              console.info(`Response: ${buffer}`);
+              // console.info(`Response: ${buffer}`);
               const data = JSON.parse(buffer.toString());
-              const treeShape = buildTreeShape(data.payload.categories);
-              console.log(JSON.stringify(treeShape, null, 4));
-              resolve(treeShape);
+              if (!readTransformation) {
+                readTransformation = buildTreeShape;
+              }
+              const transformed = readTransformation(data.payload.categories);
+              // console.log(`Category transformed data: ${JSON.stringify(transformed, null, 4)}`);
+              resolve(transformed);
             });
           });
 
@@ -188,14 +189,14 @@ export const buildCategoriesDataSource = (userId?: string) => {
             reject(err);
           });
 
-          console.log(`Posting request: ${bodyString}`);
+          // console.log(`Posting request: ${bodyString}`);
           req.write(bodyString);
           req.end();
         });
       },
 
       update: function (key: any | string | number, values: { caption: string }) {
-        console.log(`updating with value ${JSON.stringify(values, null, 4)}`);
+        //console.log(`updating with value ${JSON.stringify(values, null, 4)}`);
         const reqBody = {
           action: 'update',
           args: {
@@ -216,7 +217,7 @@ export const buildCategoriesDataSource = (userId?: string) => {
           },
         };
 
-        console.log(`request options: ${JSON.stringify(options, null, 4)}`);
+        //  console.log(`request options: ${JSON.stringify(options, null, 4)}`);
 
         return new Promise((resolve, reject) => {
           const req = http.request(options, (res) => {
@@ -231,7 +232,7 @@ export const buildCategoriesDataSource = (userId?: string) => {
 
             res.on('end', () => {
               const responseData = buffer.toString();
-              console.info(`Response: ${JSON.stringify(responseData)}`);
+              // console.info(`Response: ${JSON.stringify(responseData)}`);
               resolve(responseData);
             });
           });
@@ -241,7 +242,7 @@ export const buildCategoriesDataSource = (userId?: string) => {
             reject(err);
           });
 
-          console.log(`Posting request: ${bodyString}`);
+          //  console.log(`Posting request: ${bodyString}`);
           req.write(bodyString);
           req.end();
         });
@@ -286,7 +287,7 @@ export const buildCategoriesDataSource = (userId?: string) => {
 
             res.on('end', () => {
               const responseData = buffer.toString();
-              console.info(`Response: ${JSON.stringify(responseData)}`);
+              // console.info(`Response: ${JSON.stringify(responseData)}`);
               resolve(responseData);
             });
           });
@@ -338,7 +339,7 @@ export const buildCategoriesDataSource = (userId?: string) => {
 
             res.on('end', () => {
               const responseData = buffer.toString();
-              console.info(`Response: ${JSON.stringify(responseData)}`);
+              // console.info(`Response: ${JSON.stringify(responseData)}`);
               resolve(responseData);
             });
           });

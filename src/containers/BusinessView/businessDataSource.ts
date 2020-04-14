@@ -13,7 +13,7 @@ export interface BusinessRequestArgs {
 export const buildBusinessDataSource = (args: BusinessRequestArgs) => {
   return {
     store: new CustomStore({
-      load: function() {
+      load: function () {
         console.log(`loadOptions: ${JSON.stringify(args, null, 4)}`);
         const reqBody = {
           action: 'read',
@@ -37,7 +37,7 @@ export const buildBusinessDataSource = (args: BusinessRequestArgs) => {
         console.log(`request options: ${JSON.stringify(options, null, 4)}`);
 
         return new Promise((resolve, reject) => {
-          const req = http.request(options, res => {
+          const req = http.request(options, (res) => {
             let buffer: Buffer;
             res.on('data', (chunk: Buffer) => {
               if (!buffer) {
@@ -48,7 +48,7 @@ export const buildBusinessDataSource = (args: BusinessRequestArgs) => {
             });
 
             res.on('end', () => {
-              console.info(`Response: ${buffer}`);
+              // console.info(`Response: ${buffer}`);
               const data = JSON.parse(buffer.toString());
               const response: loadResult = {
                 totalCount: data.payload.count,
@@ -58,7 +58,7 @@ export const buildBusinessDataSource = (args: BusinessRequestArgs) => {
             });
           });
 
-          req.on('error', err => {
+          req.on('error', (err) => {
             console.error(`Error: ${err.message || err}`);
             reject(err);
           });
