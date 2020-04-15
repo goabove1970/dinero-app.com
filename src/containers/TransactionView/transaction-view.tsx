@@ -89,26 +89,32 @@ export class TransactionViewElement extends React.Component<TransactionViewProps
 
   itemClick(e: any) {
     console.log(`itemClick: ${JSON.stringify(e.itemData, null, 4)}`);
+    const selectedMenuItem: ContextMenuItem = e.itemData;
+    const transaction =
+      (this.selectedRowData && this.selectedRowData.row && this.selectedRowData.row.data) || undefined;
+    if (!selectedMenuItem || !transaction) {
+      return;
+    }
+    const transactionId = transaction.transactionId;
+    const categoryId: string | undefined = selectedMenuItem.id;
 
-    if (
-      this.selectedRowData &&
-      this.selectedRowData.row &&
-      this.selectedRowData.row.data &&
-      this.selectedRowData.row.data.transactionId
-    ) {
-      const categoryId: string = e.itemData.id;
-      const transactionId = this.selectedRowData.row.data.transactionId;
-      console.log(`Moving transaction ${transactionId} to category ${categoryId}`);
-      this.transactionsStore.store
-        .update(transactionId, {
-          categoryId,
-        })
-        .then(() => {
-          if (this.selectedRowData && this.selectedRowData.component) {
-            console.log(`Refreshing component...`);
-            this.selectedRowData.component.refresh();
-          }
-        });
+    switch (selectedMenuItem.itemType) {
+      case TransactionContextMenuItemType.moveToCategory: {
+        console.log(`Moving transaction ${transactionId} to category ${categoryId}`);
+        this.transactionsStore.store
+          .update(transactionId, {
+            categoryId,
+          })
+          .then(() => {
+            if (this.selectedRowData && this.selectedRowData.component) {
+              console.log(`Refreshing component...`);
+              this.selectedRowData.component.refresh();
+            }
+          });
+      }
+      case TransactionContextMenuItemType.hideUnhide: {
+        console.log(`Hiding/Unhiding transaction ${transactionId}`);
+      }
     }
   }
 
