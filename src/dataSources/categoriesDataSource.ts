@@ -1,6 +1,7 @@
 import CustomStore from 'devextreme/data/custom_store';
 import * as http from 'http';
 import { categoryTreeNode, category } from '../contracts/categoryTreeNode';
+import CONFIG from '../config';
 
 function dropOrphanCategoriesAndLoops(cats: category[]): category[] {
   const res = cats.filter((c) => !isOrphanOrLooped(cats, c));
@@ -95,8 +96,8 @@ export const buildCategoriesDataSource = (userId?: string, readTransformation?: 
 
         const options = {
           method: 'POST',
-          hostname: 'localhost',
-          port: 9000,
+          hostname: CONFIG.serviceUrl,
+          port: CONFIG.port,
           path: '/categories',
           headers: {
             'content-type': 'application/json',
@@ -150,8 +151,8 @@ export const buildCategoriesDataSource = (userId?: string, readTransformation?: 
 
         const options = {
           method: 'POST',
-          hostname: 'localhost',
-          port: 9000,
+          hostname: CONFIG.serviceUrl,
+          port: CONFIG.port,
           path: '/categories',
           headers: {
             'content-type': 'application/json',
@@ -208,8 +209,8 @@ export const buildCategoriesDataSource = (userId?: string, readTransformation?: 
 
         const options = {
           method: 'POST',
-          hostname: 'localhost',
-          port: 9000,
+          hostname: CONFIG.serviceUrl,
+          port: CONFIG.port,
           path: '/categories',
           headers: {
             'content-type': 'application/json',
@@ -263,8 +264,8 @@ export const buildCategoriesDataSource = (userId?: string, readTransformation?: 
 
         const options = {
           method: 'POST',
-          hostname: 'localhost',
-          port: 9000,
+          hostname: CONFIG.serviceUrl,
+          port: CONFIG.port,
           path: '/categories',
           headers: {
             'content-type': 'application/json',
@@ -315,8 +316,8 @@ export const buildCategoriesDataSource = (userId?: string, readTransformation?: 
 
         const options = {
           method: 'POST',
-          hostname: 'localhost',
-          port: 9000,
+          hostname: CONFIG.serviceUrl,
+          port: CONFIG.port,
           path: '/categories',
           headers: {
             'content-type': 'application/json',

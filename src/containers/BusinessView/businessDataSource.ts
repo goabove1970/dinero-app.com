@@ -1,5 +1,6 @@
 import CustomStore from 'devextreme/data/custom_store';
 import * as http from 'http';
+import CONFIG from '../../config';
 
 interface loadResult {
   data: any[];
@@ -25,8 +26,8 @@ export const buildBusinessDataSource = (args: BusinessRequestArgs) => {
 
         const options = {
           method: 'POST',
-          hostname: 'localhost',
-          port: 9000,
+          hostname: CONFIG.serviceUrl,
+          port: CONFIG.port,
           path: '/business',
           headers: {
             'content-type': 'application/json',

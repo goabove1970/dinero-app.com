@@ -8,6 +8,7 @@ import TreeView from 'devextreme-react/tree-view';
 import CustomStore from 'devextreme/data/custom_store';
 import * as http from 'http';
 import BusinessViewElement from '../containers/BusinessView';
+import CONFIG from '../config';
 
 export enum TreeMenuItemType {
   Transactions,
@@ -94,8 +95,8 @@ const categoriesReadDataSource = (userId?: string) => {
 
         const options = {
           method: 'POST',
-          hostname: 'localhost',
-          port: 9000,
+          hostname: CONFIG.serviceUrl,
+          port: CONFIG.port,
           path: '/categories',
           headers: {
             'content-type': 'application/json',

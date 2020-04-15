@@ -2,6 +2,7 @@ import CustomStore from 'devextreme/data/custom_store';
 import * as http from 'http';
 import { buildTreeShape } from '../../dataSources/categoriesDataSource';
 import { categoryTreeNode } from '../../contracts/categoryTreeNode';
+import CONFIG from '../../config';
 
 export enum TransactionContextMenuItemType {
   moveToCategory,
@@ -59,8 +60,8 @@ export const buildTransactionContextMenuDataSource = (userId?: string) => {
 
         const options = {
           method: 'POST',
-          hostname: 'localhost',
-          port: 9000,
+          hostname: CONFIG.serviceUrl,
+          port: CONFIG.port,
           path: '/categories',
           headers: {
             'content-type': 'application/json',

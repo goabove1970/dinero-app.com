@@ -1,6 +1,7 @@
 import CustomStore from 'devextreme/data/custom_store';
 import * as http from 'http';
 import { TransactionCategorizationType } from './categorization';
+import CONFIG from '../../config';
 
 interface loadResult {
   data: any[];
@@ -34,8 +35,8 @@ export const buildTransactionDataSource = (args: TransactionRequestArgs) => {
 
         const options = {
           method: 'POST',
-          hostname: 'localhost',
-          port: 9000,
+          hostname: CONFIG.serviceUrl,
+          port: CONFIG.port,
           path: '/transactions',
           headers: {
             'content-type': 'application/json',
@@ -96,8 +97,8 @@ export const buildTransactionDataSource = (args: TransactionRequestArgs) => {
 
         const options = {
           method: 'POST',
-          hostname: 'localhost',
-          port: 9000,
+          hostname: CONFIG.serviceUrl,
+          port: CONFIG.port,
           path: '/transactions',
           headers: {
             'content-type': 'application/json',
@@ -154,8 +155,8 @@ export const buildTransactionDataSource = (args: TransactionRequestArgs) => {
 
         const options = {
           method: 'POST',
-          hostname: 'localhost',
-          port: 9000,
+          hostname: CONFIG.serviceUrl,
+          port: CONFIG.port,
           path: '/transactions',
           headers: {
             'content-type': 'application/json',
