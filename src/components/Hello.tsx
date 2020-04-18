@@ -104,7 +104,7 @@ const categoriesReadDataSource = (userId?: string) => {
           },
         };
 
-        console.log(`request options: ${JSON.stringify(options, null, 4)}`);
+        // console.log(`request options: ${JSON.stringify(options, null, 4)}`);
 
         return new Promise((resolve, reject) => {
           const req = http.request(options, (res) => {
@@ -121,7 +121,7 @@ const categoriesReadDataSource = (userId?: string) => {
               // console.info(`Response: ${buffer}`);
               const data = JSON.parse(buffer.toString());
               const topLevel = topLevelCategoriesNodes(data.payload.categories);
-              console.log(JSON.stringify(topLevel, null, 4));
+              // console.log(JSON.stringify(topLevel, null, 4));
               resolve(topLevel);
             });
           });
@@ -131,7 +131,7 @@ const categoriesReadDataSource = (userId?: string) => {
             reject(err);
           });
 
-          console.log(`Posting request: ${bodyString}`);
+          // console.log(`Posting request: ${bodyString}`);
           req.write(bodyString);
           req.end();
         });
@@ -195,7 +195,7 @@ export class Hello extends React.Component<Props, MainMenuState> {
 
   renderTreeContent(): JSX.Element | undefined {
     const menuItem: MainMenyItem = this.state.selectedMenuItem;
-    console.log(`Rendering content: ${JSON.stringify(menuItem, null, 4)}`);
+    //console.log(`Rendering content: ${JSON.stringify(menuItem, null, 4)}`);
     if (menuItem) {
       switch (menuItem.element) {
         case TreeMenuItemType.Transactions:
@@ -211,7 +211,7 @@ export class Hello extends React.Component<Props, MainMenuState> {
 
   handleTreeViewSelectionChange(e: any) {
     const selectedMenuItem: MainMenyItem = e.itemData;
-    console.log(JSON.stringify(selectedMenuItem));
+    // console.log(JSON.stringify(selectedMenuItem));
     this.setState({
       selectedMenuItem: selectedMenuItem,
     });

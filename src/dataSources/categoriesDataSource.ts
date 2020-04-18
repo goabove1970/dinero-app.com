@@ -105,7 +105,7 @@ export const buildCategoriesDataSource = (userId?: string, readTransformation?: 
           },
         };
 
-        console.log(`request options: ${JSON.stringify(options, null, 4)}`);
+        // console.log(`request options: ${JSON.stringify(options, null, 4)}`);
 
         return new Promise((resolve, reject) => {
           const req = http.request(options, (res) => {
@@ -273,7 +273,7 @@ export const buildCategoriesDataSource = (userId?: string, readTransformation?: 
           },
         };
 
-        console.log(`request options: ${JSON.stringify(options, null, 4)}`);
+        // console.log(`request options: ${JSON.stringify(options, null, 4)}`);
 
         return new Promise((resolve, reject) => {
           const req = http.request(options, (res) => {
@@ -325,7 +325,7 @@ export const buildCategoriesDataSource = (userId?: string, readTransformation?: 
           },
         };
 
-        console.log(`request options: ${JSON.stringify(options, null, 4)}`);
+        // console.log(`request options: ${JSON.stringify(options, null, 4)}`);
 
         return new Promise((resolve, reject) => {
           const req = http.request(options, (res) => {

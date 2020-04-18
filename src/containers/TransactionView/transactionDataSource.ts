@@ -12,6 +12,8 @@ export interface TransactionRequestArgs {
   startDate?: Date;
   endDate?: Date;
   categorization?: TransactionCategorizationType;
+  showHidden?: boolean;
+  showExcluded?: boolean;
 }
 
 export const buildTransactionDataSource = (args: TransactionRequestArgs) => {
@@ -126,6 +128,9 @@ export const buildTransactionDataSource = (args: TransactionRequestArgs) => {
                 totalCount: data.payload.count,
                 data: data.payload.transactions,
               };
+              if (args.showHidden === false) {
+                response.data = response.data.filter((t) => !t.isHidden);
+              }
               resolve(response);
             });
           });
@@ -141,17 +146,18 @@ export const buildTransactionDataSource = (args: TransactionRequestArgs) => {
         });
       },
 
-      update: function (key: any | string | number, values: { categoryId?: string }) {
-        console.log(`updating transaction ${key} with value ${JSON.stringify(values, null, 4)}`);
+      update: function (key: any | string | number, values: { categoryId?: string; statusModification?: string }) {
+        // console.log(`updating transaction ${key} with value ${JSON.stringify(values, null, 4)}`);
         const reqBody = {
           action: 'update',
           args: {
             categoryId: values.categoryId,
+            statusModification: values.statusModification,
             transactionId: key,
           },
         };
         const bodyString = JSON.stringify(reqBody);
-        console.log(`Update transaction request: ${bodyString}`);
+        // console.log(`Update transaction request: ${bodyString}`);
 
         const options = {
           method: 'POST',
@@ -189,7 +195,7 @@ export const buildTransactionDataSource = (args: TransactionRequestArgs) => {
             reject(err);
           });
 
-          console.log(`Posting request: ${bodyString}`);
+          // console.log(`Posting request: ${bodyString}`);
           req.write(bodyString);
           req.end();
         });

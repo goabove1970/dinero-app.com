@@ -7,6 +7,7 @@ import CONFIG from '../../config';
 export enum TransactionContextMenuItemType {
   moveToCategory,
   hideUnhide,
+  includeExclude,
   removeFromCalculations,
   empty,
 }
@@ -16,6 +17,8 @@ export interface ContextMenuItem {
   items?: ContextMenuItem[];
   id?: string;
   itemType: TransactionContextMenuItemType;
+  icon?: string;
+  beginGroup?: boolean;
 }
 
 const categoryTreeShapeToDoubleLevelMenu = (tree: categoryTreeNode[]): ContextMenuItem[] => {
@@ -98,7 +101,7 @@ export const buildTransactionContextMenuDataSource = (userId?: string) => {
             reject(err);
           });
 
-          console.log(`Posting category request for context menu: ${bodyString}`);
+          // console.log(`Posting category request for context menu: ${bodyString}`);
           req.write(bodyString);
           req.end();
         });

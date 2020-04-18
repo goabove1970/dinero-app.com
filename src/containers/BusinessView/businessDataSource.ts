@@ -35,7 +35,7 @@ export const buildBusinessDataSource = (args: BusinessRequestArgs) => {
           },
         };
 
-        console.log(`request options: ${JSON.stringify(options, null, 4)}`);
+        // console.log(`request options: ${JSON.stringify(options, null, 4)}`);
 
         return new Promise((resolve, reject) => {
           const req = http.request(options, (res) => {

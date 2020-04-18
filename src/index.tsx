@@ -16,7 +16,7 @@ const store = createStore<StoreState>(enthusiasm, {
   // languageName: 'TypeScript',
 });
 
-console.log('rendering...');
+// console.log('rendering...');
 ReactDOM.render(
   <Provider store={store}>
     <Hello />
