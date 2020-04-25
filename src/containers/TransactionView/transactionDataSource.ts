@@ -1,6 +1,6 @@
 import CustomStore from 'devextreme/data/custom_store';
 import * as http from 'http';
-import { TransactionCategorizationType } from './categorization';
+import { TransactionCategorizationType } from '../common/categorization';
 import CONFIG from '../../config';
 
 interface loadResult {
@@ -14,6 +14,9 @@ export interface TransactionRequestArgs {
   categorization?: TransactionCategorizationType;
   showHidden?: boolean;
   showExcluded?: boolean;
+  accountId?: string;
+  userId?: string;
+  categoryId?: string;
 }
 
 export const buildTransactionDataSource = (args: TransactionRequestArgs) => {
@@ -27,7 +30,8 @@ export const buildTransactionDataSource = (args: TransactionRequestArgs) => {
         const reqBody = {
           action: 'read-transactions',
           args: {
-            accountId: 'dadcefdd-b198-08cf-b396-7cf044631d32',
+            transactionId: key,
+            userId: args.userId,
             startDate: args.startDate,
             endDate: args.endDate,
             categorization: args.categorization,
@@ -78,7 +82,7 @@ export const buildTransactionDataSource = (args: TransactionRequestArgs) => {
             reject(err);
           });
 
-          // console.log(`Posting request: ${bodyString}`);
+          console.log(`Posting request: ${bodyString}`);
           req.write(bodyString);
           req.end();
         });
@@ -89,10 +93,12 @@ export const buildTransactionDataSource = (args: TransactionRequestArgs) => {
         const reqBody = {
           action: 'read-transactions',
           args: {
-            accountId: 'dadcefdd-b198-08cf-b396-7cf044631d32',
+            // accountId: 'dadcefdd-b198-08cf-b396-7cf044631d32',
             startDate: args.startDate,
             endDate: args.endDate,
             categorization: args.categorization,
+            categoryId: args.categoryId,
+            userId: args.userId,
           },
         };
         const bodyString = JSON.stringify(reqBody);
@@ -108,7 +114,7 @@ export const buildTransactionDataSource = (args: TransactionRequestArgs) => {
           },
         };
 
-        // console.log(`request options: ${JSON.stringify(options, null, 4)}`);
+        // console.log(`request transactions options: ${JSON.stringify(options, null, 4)}`);
 
         return new Promise((resolve, reject) => {
           const req = http.request(options, (res) => {
@@ -131,6 +137,9 @@ export const buildTransactionDataSource = (args: TransactionRequestArgs) => {
               if (args.showHidden === false) {
                 response.data = response.data.filter((t) => !t.isHidden);
               }
+              if (args.showExcluded === false) {
+                response.data = response.data.filter((t) => !t.isExcluded);
+              }
               resolve(response);
             });
           });
@@ -140,7 +149,7 @@ export const buildTransactionDataSource = (args: TransactionRequestArgs) => {
             reject(err);
           });
 
-          // console.log(`Posting request: ${bodyString}`);
+          // console.log(`Posting transaction request: ${bodyString}`);
           req.write(bodyString);
           req.end();
         });

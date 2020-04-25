@@ -1,8 +1,6 @@
 import * as React from 'react';
 import * as moment from 'moment';
-import 'devextreme/data/odata/store';
-import 'whatwg-fetch';
-import './transaction-view.css';
+
 import { Button } from 'devextreme-react';
 
 export enum TransactionIntervalType {
@@ -22,36 +20,34 @@ export interface TransactionIntervalSelectionOption {
 }
 
 export const buildTransactionIntervalOption = (
-  intervalType: TransactionIntervalType
-): TransactionIntervalSelectionOption => {
+  intervalType?: TransactionIntervalType
+): TransactionIntervalSelectionOption | undefined => {
+  if (intervalType === undefined) {
+    return undefined;
+  }
+
   switch (intervalType) {
     case TransactionIntervalType.thisMonth: {
       return {
         intervalType,
         caption: 'This Month',
-        startDate: moment()
-          .startOf('month')
-          .toDate(),
+        startDate: moment().startOf('month').toDate(),
         endDate: moment().toDate(),
       };
     }
     case TransactionIntervalType.lastMonth: {
       return {
         intervalType,
-        caption: '1 Month',
-        startDate: moment()
-          .subtract(1, 'month')
-          .toDate(),
-        endDate: moment().toDate(),
+        caption: 'Last Month',
+        startDate: moment().startOf('month').subtract(1, 'month').toDate(),
+        endDate: moment().startOf('month').subtract(1, 'day').toDate(),
       };
     }
     case TransactionIntervalType.threeMonths: {
       return {
         intervalType,
         caption: '3 Months',
-        startDate: moment()
-          .subtract(3, 'month')
-          .toDate(),
+        startDate: moment().subtract(3, 'month').toDate(),
         endDate: moment().toDate(),
       };
     }
@@ -59,9 +55,7 @@ export const buildTransactionIntervalOption = (
       return {
         intervalType,
         caption: '6 Months',
-        startDate: moment()
-          .subtract(6, 'month')
-          .toDate(),
+        startDate: moment().subtract(6, 'month').toDate(),
         endDate: moment().toDate(),
       };
     }
@@ -69,10 +63,8 @@ export const buildTransactionIntervalOption = (
       return {
         intervalType,
         caption: '1 Year',
-        startDate: moment()
-          .subtract(1, 'year')
-          .toDate(),
-        endDate: moment().toDate(),
+        startDate: moment().subtract(1, 'year').toDate(),
+        endDate: moment().subtract(1, 'day').toDate(),
       };
     }
 
@@ -91,13 +83,13 @@ export const intervalButtons = [
   TransactionIntervalType.threeMonths,
   TransactionIntervalType.sixMonths,
   TransactionIntervalType.twelveMonths,
-].map(m => buildTransactionIntervalOption(m));
+].map((m) => buildTransactionIntervalOption(m));
 
-export const renderIntervalButtonsRow = (selectedInterval: TransactionIntervalType, onClick: any) => {
+export const renderIntervalButtonsRow = (selectedInterval: TransactionIntervalType | undefined, onClick: any) => {
   return (
     <div className="interval-buttons-row">
       <div className="buttons">
-        {intervalButtons.map(button => {
+        {intervalButtons.map((button) => {
           return (
             <div>
               <div className="buttons-column">

@@ -1,0 +1,20 @@
+/* .account-manage-content, */
+.first-group,
+.button-group,
+.second-group {
+  padding: 20px;
+  /* background-color: rgba(191, 191, 191, 0.15); */
+  width: 800px;
+}
+
+.second-group {
+  background-color: rgba(191, 191, 191, 0.15);
+}
+
+/*
+
+.button-group {
+  background-color: rgba(191, 191, 191, 0.15); 
+} 
+
+*/

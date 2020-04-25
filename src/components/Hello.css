@@ -5,6 +5,7 @@
 .container,
 .left-content {
   min-height: 530px;
+  /* height: 100%; */
 }
 
 .left-content {
@@ -21,4 +22,6 @@
   left: 220px;
   top: 0;
   height: 100%;
+  /* background-color: rgba(191, 191, 191, 0.15); */
+  /* width: 800px; */
 }

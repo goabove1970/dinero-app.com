@@ -1,0 +1,16 @@
+.accounts-content {
+  top: 0;
+  height: 100%;
+  text-align: left;
+  padding: 20px;
+  font-size: 14px;
+}
+
+.accounts-content .sub-title {
+  font-size: 80%;
+  color: rgba(152, 152, 152, 0.8);
+}
+
+#app {
+  align-self: center;
+}

@@ -1,4 +1,5 @@
 import * as React from 'react';
+// import React from 'react';
 import './Hello.css';
 import TransactionViewElement from '../containers/TransactionView';
 import CategoryViewElement from '../containers/CategoryView';
@@ -9,6 +10,8 @@ import CustomStore from 'devextreme/data/custom_store';
 import * as http from 'http';
 import BusinessViewElement from '../containers/BusinessView';
 import CONFIG from '../config';
+import SpendingsViewElement from '../containers/SpendingsView';
+import AccountsViewElement from '../containers/AccountsView';
 
 export enum TreeMenuItemType {
   Transactions,
@@ -16,6 +19,7 @@ export enum TreeMenuItemType {
   Categories,
   SubCategories,
   Businesses,
+  Spendings,
 }
 
 export interface MainMenyItem {
@@ -42,7 +46,24 @@ const businessesMenuItem = {
   items: [],
 };
 
+const spendingsMenuItem = {
+  // id: '2',
+  text: 'Spendings',
+  expanded: false,
+  element: TreeMenuItemType.Spendings,
+  items: [],
+};
+
+const accountsMenuItem = {
+  // id: '2',
+  text: 'Accounts',
+  expanded: false,
+  element: TreeMenuItemType.Accounts,
+  items: [],
+};
+
 export const menuItemsSource: MainMenyItem[] = [
+  spendingsMenuItem,
   {
     // id: '1',
     text: 'Transactions',
@@ -50,6 +71,7 @@ export const menuItemsSource: MainMenyItem[] = [
     element: TreeMenuItemType.Transactions,
   },
   categoriesMenuItem,
+  accountsMenuItem,
   businessesMenuItem,
 ];
 
@@ -204,6 +226,10 @@ export class Hello extends React.Component<Props, MainMenuState> {
           return <CategoryViewElement userId={this.props.userId} />;
         case TreeMenuItemType.Businesses:
           return <BusinessViewElement accountId={this.props.activeAccount} />;
+        case TreeMenuItemType.Spendings:
+          return <SpendingsViewElement userId={this.props.userId} />;
+        case TreeMenuItemType.Accounts:
+          return <AccountsViewElement userId={this.props.userId} />;
       }
     }
     return undefined;

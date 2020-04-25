@@ -1,12 +1,22 @@
+#pie {
+  height: 400px;
+}
+
+.pie,
 .transactions,
-.transactions-span {
+.monthly-spendings,
+.transactions-span,
+.income-spendings {
   padding: 20px;
   background-color: rgba(191, 191, 191, 0.15);
   margin-top: 20px;
 }
 
+.transactions-span > .caption,
+.monthly-spendings > .caption,
+.pie > .caption,
 .transactions > .caption,
-.transactions-span > .caption {
+.income-spendings > .caption {
   font-weight: 500;
   margin-bottom: 20px;
   font-size: 25px;
@@ -17,15 +27,25 @@
   cursor: default;
 }
 
-.interval-buttons-row {
-  width: 800px;
-  align-self: left;
+.spendings-content {
+  top: 0;
+  height: 100%;
+  text-align: left;
+  font-size: 14px;
 }
 
-.transaction-file-import {
-  display: block;
-  flex-wrap: wrap;
-  margin-right: 5px;
+.spendings-content .sub-title {
+  font-size: 80%;
+  color: rgba(152, 152, 152, 0.8);
+}
+
+#app {
+  align-self: center;
+}
+
+.interval-buttons-row {
+  width: 600px;
+  align-self: left;
 }
 
 .buttons {
@@ -36,11 +56,13 @@
 }
 
 .buttons-column > div {
+  /* width: 140px; */
   height: 40px;
   text-align: center;
   margin-right: 5px;
 }
 
 .buttons-column {
+  /* width: 115px; */
   justify-content: center;
 }

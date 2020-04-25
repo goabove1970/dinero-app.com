@@ -1,7 +1,6 @@
 import * as React from 'react';
 import 'devextreme/data/odata/store';
 import 'whatwg-fetch';
-import './transaction-view.css';
 import { Button } from 'devextreme-react';
 
 export type TransactionCategorizationType = 'uncategorized' | 'categorized' | 'all';
@@ -44,7 +43,7 @@ export const renderCategorizationButtonsRow = (selectedCategory: TransactionCate
   return (
     <div className="interval-buttons-row">
       <div className="buttons">
-        {categoryButtons.map(button => {
+        {categoryButtons.map((button) => {
           return (
             <div>
               <div className="buttons-column">

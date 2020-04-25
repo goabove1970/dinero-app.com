@@ -1,0 +1,22 @@
+#chart {
+  height: 300px;
+}
+
+.monthly-content {
+  position: relative;
+  height: 300px;
+}
+
+.categories-table {
+  display: inline-block;
+  width: 280px;
+}
+
+.categories-chart {
+  position: absolute;
+  right: 0;
+  left: 320px;
+  padding: 0 10px 10px;
+  top: 0;
+  height: 300px;
+}
