@@ -42,7 +42,11 @@ const categoryTreeShapeToDoubleLevelMenu = (tree: categoryTreeNode[]): ContextMe
       });
     }
   });
-  return upperLevel;
+  const sortedUpperLevel = upperLevel.sort((a, b) => (a.text > b.text ? 1 : -1));
+  sortedUpperLevel.forEach((e: ContextMenuItem) => {
+    e.items = e.items && e.items.sort((a, b) => (a.text > b.text ? 1 : -1));
+  });
+  return sortedUpperLevel;
 };
 
 export const buildTransactionContextMenuDataSource = (userId?: string) => {
