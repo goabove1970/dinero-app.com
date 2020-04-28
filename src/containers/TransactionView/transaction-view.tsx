@@ -36,7 +36,6 @@ import moment = require('moment');
 // import { inspect } from 'util';
 
 export interface TransactionViewProps {
-  accountId?: string;
   userId?: string;
 }
 
@@ -438,7 +437,7 @@ export class TransactionViewElement extends React.Component<TransactionViewProps
             onSelectionChanged={this.accordionSelectionChanged}
             animationDuration={400}
             itemRender={(props: any) => {
-              console.log(`Rendering accordion item: ${inspect(props)}`);
+              // console.log(`Rendering accordion item: ${inspect(props)}`);
               switch (props.type) {
                 case 'import_transactions':
                   return this.buildTransUploaderBlock();
@@ -476,7 +475,7 @@ export class TransactionViewElement extends React.Component<TransactionViewProps
           >
             <Sorting></Sorting>
             {/* <Editing mode="row" allowUpdating={true} allowAdding={true}></Editing> */}
-            <Paging defaultPageSize={20} />
+            <Paging defaultPageSize={50} />
             <Pager showPageSizeSelector={true} allowedPageSizes={[5, 10, 20, 100]} showInfo={true} />
             <Column
               dataField={'chaseTransaction.PostingDate'}

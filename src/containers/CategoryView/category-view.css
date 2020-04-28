@@ -1,12 +1,16 @@
-.category-content {
-  top: 0;
-  height: 100%;
-  text-align: left;
-
-  font-size: 16px;
+.categoty-content {
+  padding: 20px;
+  background-color: rgba(191, 191, 191, 0.15);
+  margin-top: 20px;
 }
 
-.category-content .sub-title {
-  font-size: 80%;
-  color: rgba(152, 152, 152, 0.8);
+.categoty-content > .caption {
+  font-weight: 500;
+  margin-bottom: 20px;
+  font-size: 25px;
+  font-family: 'Segoe UI Light', 'Helvetica Neue Light', 'Segoe UI', 'Helvetica Neue', 'Trebuchet MS', Verdana,
+    sans-serif;
+  font-weight: 200;
+  fill: #232323;
+  cursor: default;
 }

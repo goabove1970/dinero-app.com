@@ -36,10 +36,8 @@ export class CategoryViewElement extends React.Component<CategoryViewProps> {
     this.customStore = store.store;
     return (
       <div className="categoty-content">
-        <b>Categories</b>
-        <div className="sub-title">
-          <div>Categories for user {this.props.userId}</div>
-        </div>
+        <div className="caption">Categories</div>
+
         <TreeList
           id="categories"
           dataSource={store}
@@ -59,6 +57,7 @@ export class CategoryViewElement extends React.Component<CategoryViewProps> {
           <Column dataField={'caption'} caption="Category Name">
             <ValidationRule type="required" />
           </Column>
+          {/* <Column dataField={'icon'} caption="Icon" visible={false}></Column> */}
           {/* <Column visible={false} dataField={'categoryId'} /> */}
           {/* <Column visible={false} dataField={'parentCategoryId'} /> */}
         </TreeList>

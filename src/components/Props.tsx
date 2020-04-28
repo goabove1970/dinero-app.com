@@ -1,4 +1,6 @@
+import { SessionData } from '../types';
+
 export interface Props {
-  activeAccount?: string;
   userId?: string;
+  sessionData?: SessionData;
 }

@@ -1,20 +1,22 @@
 import Hello from '../components/Hello';
 import * as actions from '../actions/';
-import { StoreState } from '../types/index';
+import { StoreState, SessionData } from '../types/index';
 import { connect, Dispatch } from 'react-redux';
 import { Props } from '../components/Props';
+// import { inspect } from 'util';
 
 export function mapStateToProps(props: StoreState): Props {
-  return {
-    activeAccount: props.activeAccount,
-    userId: props.activeUser,
+  const res: Props = {
+    userId: props.session && props.session && props.session.userId,
+    sessionData: props.session,
   };
+  // console.log(`Calling main view mapStateToProps: ${inspect(props)}\nNew props: ${inspect(res)}`);
+  return res;
 }
 
-export function mapDispatchToProps(dispatch: Dispatch<actions.EnthusiasmAction>) {
+export function mapDispatchToProps(dispatch: Dispatch<actions.AuthActions>) {
   return {
-    onIncrement: () => dispatch(actions.incrementEnthusiasm()),
-    onDecrement: () => dispatch(actions.decrementEnthusiasm()),
+    sessionDataLoaded: (sessionData: SessionData) => dispatch(actions.sessionDataLoaded(sessionData)),
   };
 }
 

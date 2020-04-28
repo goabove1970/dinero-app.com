@@ -24,7 +24,7 @@ interface MonthlyCategoriesState {
 export class MonthlyCategoriesElement extends React.Component<MonthlyCategoriesProps, MonthlyCategoriesState> {
   constructor(props: MonthlyCategoriesProps) {
     super(props);
-    console.log(`MonthlyCategoriesElement, props: ${inspect(props)}`);
+    // console.log(`MonthlyCategoriesElement, props: ${inspect(props)}`);
 
     this.state = {
       store: this.buildSpendingsStore(props),
@@ -35,7 +35,7 @@ export class MonthlyCategoriesElement extends React.Component<MonthlyCategoriesP
     const source = props.categoryId
       ? props.spendings.subs.filter((c) => c.parentCategoryId === props.categoryId)
       : props.spendings.parents;
-    console.log(`Source: ${inspect(source)}`);
+    // console.log(`Source: ${inspect(source)}`);
     const lastMonth = source.reduce((lastMonth, c) => {
       if (moment(c.month).isAfter(lastMonth)) {
         return moment(c.month);
@@ -66,7 +66,7 @@ export class MonthlyCategoriesElement extends React.Component<MonthlyCategoriesP
         return (a.debit || 0) - (b.debit || 0);
       })
       .reverse();
-    return topCategoriesSource;
+    return topCategoriesSource.filter((c) => c.debit && c.debit > 0);
   }
 
   componentWillReceiveProps(props: MonthlyCategoriesProps) {

@@ -12,6 +12,10 @@ import BusinessViewElement from '../containers/BusinessView';
 import CONFIG from '../config';
 import SpendingsViewElement from '../containers/SpendingsView';
 import AccountsViewElement from '../containers/AccountsView';
+// import { inspect } from 'util';
+import LoginElement from '../containers/LoginContainer';
+import { getStore } from '..';
+import { loginRequested } from '../actions';
 
 export enum TreeMenuItemType {
   Transactions,
@@ -165,6 +169,7 @@ const categoriesReadDataSource = (userId?: string) => {
 
 interface MainMenuState {
   selectedMenuItem: MainMenyItem;
+  userId?: number;
 }
 
 export class Hello extends React.Component<Props, MainMenuState> {
@@ -185,47 +190,61 @@ export class Hello extends React.Component<Props, MainMenuState> {
 
   render() {
     // console.log(`Rendering... state: ${JSON.stringify(this.state, null, 4)}`);
-    const userId = this.props.userId;
-    if (!this.customStore) {
-      this.customStore = {
-        store: new CustomStore({
-          load: function (loadOptions) {
-            const categoriesStore = categoriesReadDataSource(userId);
-            return categoriesStore.store.load().then((items) => {
-              categoriesMenuItem.items = items;
-              return menuItemsSource;
-            });
-          },
-        }),
-      };
+    if (this.props && this.props.userId) {
+      const userId = this.props.userId;
+      if (!this.customStore) {
+        this.customStore = {
+          store: new CustomStore({
+            load: function (loadOptions) {
+              const categoriesStore = categoriesReadDataSource(userId);
+              return categoriesStore.store.load().then((items) => {
+                categoriesMenuItem.items = items;
+                return menuItemsSource;
+              });
+            },
+          }),
+        };
+      }
     }
 
     return (
-      <div className="container">
-        <div className="left-content">
-          <TreeView
-            selectionMode="single"
-            selectByClick={true}
-            onItemSelectionChanged={this.handleTreeViewSelectionChange}
-            dataSource={this.customStore}
+      <div>
+        {this.props.sessionData && this.props.userId ? (
+          <div className="container">
+            <div className="left-content">
+              <TreeView
+                selectionMode="single"
+                selectByClick={true}
+                onItemSelectionChanged={this.handleTreeViewSelectionChange}
+                dataSource={this.customStore}
+              />
+            </div>
+            <div className="right-content">{this.renderTreeContent()}</div>
+          </div>
+        ) : (
+          <LoginElement
+            onLogin={(login: string, password: string) => {
+              getStore().dispatch(loginRequested(login, password));
+            }}
           />
-        </div>
-        <div className="right-content">{this.renderTreeContent()}</div>
+        )}
       </div>
     );
   }
 
   renderTreeContent(): JSX.Element | undefined {
+    // console.log(`Cookies: ${inspect(document.cookie)}`);
+
     const menuItem: MainMenyItem = this.state.selectedMenuItem;
     //console.log(`Rendering content: ${JSON.stringify(menuItem, null, 4)}`);
     if (menuItem) {
       switch (menuItem.element) {
         case TreeMenuItemType.Transactions:
-          return <TransactionViewElement accountId={this.props.activeAccount} userId={this.props.userId} />;
+          return <TransactionViewElement userId={this.props.userId} />;
         case TreeMenuItemType.Categories:
           return <CategoryViewElement userId={this.props.userId} />;
         case TreeMenuItemType.Businesses:
-          return <BusinessViewElement accountId={this.props.activeAccount} />;
+          return <BusinessViewElement userId={this.props.userId} />;
         case TreeMenuItemType.Spendings:
           return <SpendingsViewElement userId={this.props.userId} />;
         case TreeMenuItemType.Accounts:

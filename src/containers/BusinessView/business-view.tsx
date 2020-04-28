@@ -7,7 +7,7 @@ import './business-view.css';
 import { buildBusinessDataSource, BusinessRequestArgs } from './businessDataSource';
 
 export interface BusinessViewProps {
-  accountId?: string;
+  userId?: string;
 }
 
 export interface BusinessViewState {}
@@ -15,7 +15,7 @@ export interface BusinessViewState {}
 export class BusinessViewElement extends React.Component<BusinessViewProps, BusinessViewState> {
   constructor(props: BusinessViewProps) {
     super(props);
-    console.log(`constructing DataGridElement for business for account '${props.accountId}'`);
+    // console.log(`constructing DataGridElement for business for account '${props.userId}'`);
     this.state = {};
   }
 
@@ -25,13 +25,10 @@ export class BusinessViewElement extends React.Component<BusinessViewProps, Busi
       <div className="business-content">
         <div>
           <b>Business</b>
-          <div className="sub-title">
-            <div>Business for account {this.props.accountId}</div>
-          </div>
         </div>
         <DataGrid
           dataSource={buildBusinessDataSource({
-            accountId: this.props.accountId,
+            userId: this.props.userId,
           } as BusinessRequestArgs)}
           columnAutoWidth={true}
           showBorders={true}

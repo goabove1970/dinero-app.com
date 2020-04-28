@@ -1,4 +1,17 @@
+export interface SessionData {
+  sessionId?: string;
+  token?: string;
+  sessionStarted?: Date;
+  userId?: string;
+}
+
+export interface UserData {
+  userId?: string;
+  userName?: string;
+  userLastName?: string;
+}
+
 export interface StoreState {
-  activeAccount?: string;
-  activeUser?: string;
+  session?: SessionData;
+  lastLoginData?: SessionData;
 }

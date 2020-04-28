@@ -196,13 +196,14 @@ export const buildCategoriesDataSource = (userId?: string, readTransformation?: 
         });
       },
 
-      update: function (key: any | string | number, values: { caption: string }) {
+      update: function (key: any | string | number, values: { caption: string; icon: string }) {
         //console.log(`updating with value ${JSON.stringify(values, null, 4)}`);
         const reqBody = {
           action: 'update',
           args: {
             categoryId: key,
             caption: values.caption,
+            icon: values.icon,
           },
         };
         const bodyString = JSON.stringify(reqBody);

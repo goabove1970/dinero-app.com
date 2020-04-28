@@ -8,7 +8,7 @@ interface loadResult {
 }
 
 export interface BusinessRequestArgs {
-  accountId: string;
+  userId: string;
 }
 
 export const buildBusinessDataSource = (args: BusinessRequestArgs) => {
@@ -19,7 +19,7 @@ export const buildBusinessDataSource = (args: BusinessRequestArgs) => {
         const reqBody = {
           action: 'read',
           args: {
-            accountId: args.accountId,
+            userId: args.userId,
           },
         };
         const bodyString = JSON.stringify(reqBody);
