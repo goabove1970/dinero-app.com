@@ -91,7 +91,7 @@ export const renderIntervalButtonsRow = (selectedInterval: TransactionIntervalTy
       <div className="buttons">
         {intervalButtons.map((button) => {
           return (
-            <div>
+            <div key={button!.intervalType}>
               <div className="buttons-column">
                 <div>
                   <Button

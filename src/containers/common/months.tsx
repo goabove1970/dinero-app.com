@@ -30,7 +30,7 @@ export const renderMonthsIntervalButtonsRow = (selectedMonth: Date | undefined, 
       <div className="buttons">
         {buildMonthIntervalOptions(depth).map((button) => {
           return (
-            <div>
+            <div key={button!.startDate!.toDateString()}>
               <div className="buttons-column">
                 <div>
                   <Button

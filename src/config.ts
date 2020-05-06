@@ -1,4 +1,4 @@
 export default {
-  serviceUrl: '10.0.0.184',
+  serviceUrl: '192.168.86.47',
   port: 9000,
 };

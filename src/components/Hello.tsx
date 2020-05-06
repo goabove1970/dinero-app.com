@@ -3,7 +3,7 @@ import * as React from 'react';
 import './Hello.css';
 import TransactionViewElement from '../containers/TransactionView';
 import CategoryViewElement from '../containers/CategoryView';
-import { Props } from './Props';
+// import { Props } from './Props';
 
 import TreeView from 'devextreme-react/tree-view';
 import CustomStore from 'devextreme/data/custom_store';
@@ -16,14 +16,20 @@ import AccountsViewElement from '../containers/AccountsView';
 import LoginElement from '../containers/LoginContainer';
 import { getStore } from '..';
 import { loginRequested } from '../actions';
+import { LoadIndicator, Menu } from 'devextreme-react';
+import { Props } from '../containers/Hello';
 
 export enum TreeMenuItemType {
   Transactions,
+  BankConnections,
   Accounts,
   Categories,
   SubCategories,
   Businesses,
   Spendings,
+  ManageAccount,
+  SignOut,
+  ImportTransactions,
 }
 
 export interface MainMenyItem {
@@ -31,7 +37,14 @@ export interface MainMenyItem {
   text: string;
   expanded: boolean;
   element: TreeMenuItemType;
-  items?: any[];
+  items?: MainMenyItem[];
+}
+
+export interface TopMenuItem {
+  text: string;
+  type: TreeMenuItemType;
+  items?: TopMenuItem[];
+  onClick: () => void;
 }
 
 const categoriesMenuItem = {
@@ -60,10 +73,26 @@ const spendingsMenuItem = {
 
 const accountsMenuItem = {
   // id: '2',
-  text: 'Accounts',
+  text: 'Bank Accounts',
   expanded: false,
   element: TreeMenuItemType.Accounts,
   items: [],
+};
+
+const signOutMenuItem = {
+  // id: '2',
+  text: 'Sign Out',
+  expanded: false,
+  element: TreeMenuItemType.SignOut,
+  items: [],
+};
+
+const myAccountMenuItem = {
+  // id: '2',
+  text: 'My Accounts',
+  expanded: false,
+  element: TreeMenuItemType.ManageAccount,
+  items: [signOutMenuItem],
 };
 
 export const menuItemsSource: MainMenyItem[] = [
@@ -77,6 +106,7 @@ export const menuItemsSource: MainMenyItem[] = [
   categoriesMenuItem,
   accountsMenuItem,
   businessesMenuItem,
+  myAccountMenuItem,
 ];
 
 interface category {
@@ -169,7 +199,9 @@ const categoriesReadDataSource = (userId?: string) => {
 
 interface MainMenuState {
   selectedMenuItem: MainMenyItem;
+  topMenuSelectedItemType: TreeMenuItemType;
   userId?: number;
+  loginInProgress: false;
 }
 
 export class Hello extends React.Component<Props, MainMenuState> {
@@ -178,15 +210,114 @@ export class Hello extends React.Component<Props, MainMenuState> {
 
     this.state = {
       selectedMenuItem: menuItemsSource[0],
+      loginInProgress: false,
+      topMenuSelectedItemType: TreeMenuItemType.Spendings,
     };
 
-    this.handleTreeViewSelectionChange = this.handleTreeViewSelectionChange.bind(this);
+    // this.handleTreeViewSelectionChange = this.handleTreeViewSelectionChange.bind(this);
+    this.handleTopMenuSelectionChange = this.handleTopMenuSelectionChange.bind(this);
     this.renderTreeContent = this.renderTreeContent.bind(this);
   }
 
   customStore: {
     store: CustomStore;
   };
+
+  topSignOuteMenuItem: TopMenuItem = {
+    text: 'Sign Out',
+    type: TreeMenuItemType.SignOut,
+    onClick: () => {
+      this.props.logout();
+    },
+  };
+
+  topManageBankAccountsMenuItem: TopMenuItem = {
+    text: 'Manage Bank Accounts',
+    type: TreeMenuItemType.Accounts,
+    onClick: () => {
+      this.handleTopMenuSelectionChange(this.topManageBankAccountsMenuItem);
+    },
+  };
+
+  topManageBankConnections: TopMenuItem = {
+    text: 'Manage Bank Connections',
+    type: TreeMenuItemType.BankConnections,
+    onClick: () => {
+      this.handleTopMenuSelectionChange(this.topManageBankConnections);
+    },
+  };
+
+  topManageBusinessesMenuItem: TopMenuItem = {
+    text: 'Manage Businesses',
+    type: TreeMenuItemType.Businesses,
+    onClick: () => {
+      this.handleTopMenuSelectionChange(this.topManageBusinessesMenuItem);
+    },
+  };
+
+  topMyAccountMenuItem: TopMenuItem = {
+    text: 'My Account',
+    type: TreeMenuItemType.ManageAccount,
+    onClick: () => {},
+    items: [
+      this.topManageBankConnections,
+      this.topManageBankAccountsMenuItem,
+      this.topManageBusinessesMenuItem,
+      this.topSignOuteMenuItem,
+    ],
+  };
+
+  topImportTransactionsMenuItem: TopMenuItem = {
+    text: 'Import Transactions Manually',
+    type: TreeMenuItemType.ImportTransactions,
+    onClick: () => {
+      this.handleTopMenuSelectionChange(this.topImportTransactionsMenuItem);
+    },
+  };
+
+  topViewBankTransactionsMenuItem: TopMenuItem = {
+    text: 'My Bank Transactions',
+    type: TreeMenuItemType.Transactions,
+    onClick: () => {
+      this.handleTopMenuSelectionChange(this.topViewBankTransactionsMenuItem);
+    },
+  };
+
+  topTransactionsMenuItem: TopMenuItem = {
+    text: 'Transactions',
+    type: TreeMenuItemType.Transactions,
+    items: [this.topViewBankTransactionsMenuItem, this.topImportTransactionsMenuItem],
+    onClick: () => {
+      this.handleTopMenuSelectionChange(this.topTransactionsMenuItem);
+    },
+  };
+
+  topCategoriesMenuItem: TopMenuItem = {
+    text: 'Manage Spending Categories',
+    type: TreeMenuItemType.Categories,
+    onClick: () => {
+      this.handleTopMenuSelectionChange(this.topCategoriesMenuItem);
+    },
+  };
+
+  topViewSpendingsMenuItem: TopMenuItem = {
+    text: 'Spendings Summary',
+    type: TreeMenuItemType.Spendings,
+    onClick: () => {
+      this.handleTopMenuSelectionChange(this.topViewSpendingsMenuItem);
+    },
+  };
+
+  topSpendingsMenuItem: TopMenuItem = {
+    text: 'Spendings',
+    type: TreeMenuItemType.Spendings,
+    items: [this.topViewSpendingsMenuItem, this.topCategoriesMenuItem],
+    onClick: () => {
+      this.handleTopMenuSelectionChange(this.topViewSpendingsMenuItem);
+    },
+  };
+
+  topMenuItems = [this.topSpendingsMenuItem, this.topTransactionsMenuItem, this.topMyAccountMenuItem];
 
   render() {
     // console.log(`Rendering... state: ${JSON.stringify(this.state, null, 4)}`);
@@ -210,16 +341,39 @@ export class Hello extends React.Component<Props, MainMenuState> {
     return (
       <div>
         {this.props.sessionData && this.props.userId ? (
-          <div className="container">
-            <div className="left-content">
-              <TreeView
-                selectionMode="single"
-                selectByClick={true}
-                onItemSelectionChanged={this.handleTreeViewSelectionChange}
-                dataSource={this.customStore}
+          <div>
+            <div className="top-menu">
+              <Menu
+                height={30}
+                dataSource={this.topMenuItems}
+                displayExpr="text"
+                showFirstSubmenuMode={{
+                  name: 'onHover',
+                  delay: { show: 0, hide: 500 },
+                }}
+                orientation={'horizontal'}
+                submenuDirection={'auto'}
+                hideSubmenuOnMouseLeave={true}
+                onItemClick={(item) => {
+                  item.itemData.onClick();
+                }}
               />
             </div>
-            <div className="right-content">{this.renderTreeContent()}</div>
+            <div className="container">
+              {/* <div className="left-content">
+                <TreeView
+                  selectionMode="single"
+                  selectByClick={true}
+                  onItemSelectionChanged={this.handleTreeViewSelectionChange}
+                  dataSource={this.customStore}
+                />
+              </div> */}
+              <div className="right-content">{this.renderTreeContent()}</div>
+            </div>
+          </div>
+        ) : this.props.loginInProgress ? (
+          <div>
+            <LoadIndicator id="large-indicator" height={60} width={60} />
           </div>
         ) : (
           <LoginElement
@@ -235,30 +389,34 @@ export class Hello extends React.Component<Props, MainMenuState> {
   renderTreeContent(): JSX.Element | undefined {
     // console.log(`Cookies: ${inspect(document.cookie)}`);
 
-    const menuItem: MainMenyItem = this.state.selectedMenuItem;
+    // const menuItem: MainMenyItem = this.state.selectedMenuItem;
     //console.log(`Rendering content: ${JSON.stringify(menuItem, null, 4)}`);
-    if (menuItem) {
-      switch (menuItem.element) {
-        case TreeMenuItemType.Transactions:
-          return <TransactionViewElement userId={this.props.userId} />;
-        case TreeMenuItemType.Categories:
-          return <CategoryViewElement userId={this.props.userId} />;
-        case TreeMenuItemType.Businesses:
-          return <BusinessViewElement userId={this.props.userId} />;
-        case TreeMenuItemType.Spendings:
-          return <SpendingsViewElement userId={this.props.userId} />;
-        case TreeMenuItemType.Accounts:
-          return <AccountsViewElement userId={this.props.userId} />;
-      }
+    switch (this.state.topMenuSelectedItemType) {
+      case TreeMenuItemType.Transactions:
+        return <TransactionViewElement userId={this.props.userId} />;
+      case TreeMenuItemType.Categories:
+        return <CategoryViewElement userId={this.props.userId} />;
+      case TreeMenuItemType.Businesses:
+        return <BusinessViewElement userId={this.props.userId} />;
+      case TreeMenuItemType.Spendings:
+        return <SpendingsViewElement userId={this.props.userId} />;
+      case TreeMenuItemType.Accounts:
+        return <AccountsViewElement userId={this.props.userId} />;
     }
     return undefined;
   }
 
-  handleTreeViewSelectionChange(e: any) {
-    const selectedMenuItem: MainMenyItem = e.itemData;
-    // console.log(JSON.stringify(selectedMenuItem));
+  // handleTreeViewSelectionChange(e: any) {
+  //   const selectedMenuItem: MainMenyItem = e.itemData;
+
+  //   this.setState({
+  //     selectedMenuItem: selectedMenuItem,
+  //   });
+  // }
+
+  handleTopMenuSelectionChange(e: TopMenuItem) {
     this.setState({
-      selectedMenuItem: selectedMenuItem,
+      topMenuSelectedItemType: e.type,
     });
   }
 }

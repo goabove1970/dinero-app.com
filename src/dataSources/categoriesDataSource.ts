@@ -2,6 +2,7 @@ import CustomStore from 'devextreme/data/custom_store';
 import * as http from 'http';
 import { categoryTreeNode, category } from '../contracts/categoryTreeNode';
 import CONFIG from '../config';
+// import { inspect } from 'util';
 
 function dropOrphanCategoriesAndLoops(cats: category[]): category[] {
   const res = cats.filter((c) => !isOrphanOrLooped(cats, c));
@@ -33,7 +34,9 @@ function isOrphanOrLooped(cats: category[], cat: category): boolean {
 }
 
 export function buildTreeShape(cats: category[]): categoryTreeNode[] {
+  // console.log(`entry: ${inspect(cats)}`);
   cats = dropOrphanCategoriesAndLoops(cats);
+  // console.log(`dropOrphanCategoriesAndLoops: ${inspect(cats)}`);
   const tree: categoryTreeNode[] = [];
   const catMap: Map<string, categoryTreeNode> = new Map<string, categoryTreeNode>();
   const discoveredCategories: string[] = [];
@@ -176,11 +179,13 @@ export const buildCategoriesDataSource = (userId?: string, readTransformation?: 
             res.on('end', () => {
               // console.info(`Response: ${buffer}`);
               const data = JSON.parse(buffer.toString());
+              // console.info(`data: ${buffer}`);
               if (!readTransformation) {
                 readTransformation = buildTreeShape;
               }
+              // console.info(`transforming: ${inspect(data.payload.categories)}`);
               const transformed = readTransformation(data.payload.categories);
-              // console.log(`Category transformed data: ${JSON.stringify(transformed, null, 4)}`);
+              // console.log(`Category transformed data: ${inspect(transformed)}`);
               resolve(transformed);
             });
           });
@@ -306,7 +311,7 @@ export const buildCategoriesDataSource = (userId?: string, readTransformation?: 
       },
 
       remove: function (key: any | string | number): Promise<any> | JQueryPromise<any> {
-        console.log(`deleting elements: ${JSON.stringify(key)}`);
+        // console.log(`deleting elements: ${JSON.stringify(key)}`);
         const reqBody = {
           action: 'delete',
           args: {
@@ -351,7 +356,7 @@ export const buildCategoriesDataSource = (userId?: string, readTransformation?: 
             reject(err);
           });
 
-          console.log(`Posting request: ${bodyString}`);
+          // console.log(`Posting request: ${bodyString}`);
           req.write(bodyString);
           req.end();
         });

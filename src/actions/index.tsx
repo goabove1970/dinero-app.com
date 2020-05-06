@@ -19,12 +19,22 @@ export interface LoginDataLoaded {
   payload: SessionData;
 }
 
-export type AuthActions = SessionLoaded | LoginRequested | LoginDataLoaded;
+export interface LogoutRequested {
+  type: constants.LOGOUT_REQUESTED;
+}
+
+export type AuthActions = SessionLoaded | LoginRequested | LoginDataLoaded | LogoutRequested;
 
 export function sessionDataLoaded(sessionData: SessionData): AuthActions {
   return {
     type: constants.SESSION_LOADED,
     payload: sessionData,
+  };
+}
+
+export function logoutRequested(): AuthActions {
+  return {
+    type: constants.LOGOUT_REQUESTED,
   };
 }
 

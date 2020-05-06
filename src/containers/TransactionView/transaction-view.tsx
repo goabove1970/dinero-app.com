@@ -424,44 +424,6 @@ export class TransactionViewElement extends React.Component<TransactionViewProps
             this.onTransactionCategorizationChanged
           )}
         </div>
-        <div>
-          <Accordion
-            defaultSelectedIndex={0}
-            collapsible={true}
-            multiple={false}
-            items={[this.filteringOptionsAccordionItem, this.importAccordionItem]}
-            selectedItems={this.state.selectedAccordionItems}
-            itemTitleRender={(i: AccordionItemWrapper) => {
-              return i.title;
-            }}
-            onSelectionChanged={this.accordionSelectionChanged}
-            animationDuration={400}
-            itemRender={(props: any) => {
-              // console.log(`Rendering accordion item: ${inspect(props)}`);
-              switch (props.type) {
-                case 'import_transactions':
-                  return this.buildTransUploaderBlock();
-                case 'filtering_options':
-                  return (
-                    <div>
-                      <CheckBox
-                        value={this.state.showHidden}
-                        defaultValue={true}
-                        onValueChanged={this.onShowHiddenChanged}
-                        text="Show Hidden Transactions"
-                      />
-                      <CheckBox
-                        value={this.state.showExcluded}
-                        defaultValue={true}
-                        onValueChanged={this.onShowExcludedChanged}
-                        text="Show Excluded Transactions"
-                      />
-                    </div>
-                  );
-              }
-            }}
-          />
-        </div>
         <div className="transactions">
           <div className="caption">Transactions</div>
           <DataGrid
@@ -502,6 +464,44 @@ export class TransactionViewElement extends React.Component<TransactionViewProps
             <Column dataField={'chaseTransaction.Amount'} caption="Amount" width={80} />
             <Column dataField={'chaseTransaction.Balance'} caption="Balance" width={80} />
           </DataGrid>
+        </div>
+        <div>
+          <Accordion
+            defaultSelectedIndex={0}
+            collapsible={true}
+            multiple={false}
+            items={[this.filteringOptionsAccordionItem, this.importAccordionItem]}
+            selectedItems={this.state.selectedAccordionItems}
+            itemTitleRender={(i: AccordionItemWrapper) => {
+              return i.title;
+            }}
+            onSelectionChanged={this.accordionSelectionChanged}
+            animationDuration={400}
+            itemRender={(props: any) => {
+              // console.log(`Rendering accordion item: ${inspect(props)}`);
+              switch (props.type) {
+                case 'import_transactions':
+                  return this.buildTransUploaderBlock();
+                case 'filtering_options':
+                  return (
+                    <div>
+                      <CheckBox
+                        value={this.state.showHidden}
+                        defaultValue={true}
+                        onValueChanged={this.onShowHiddenChanged}
+                        text="Show Hidden Transactions"
+                      />
+                      <CheckBox
+                        value={this.state.showExcluded}
+                        defaultValue={true}
+                        onValueChanged={this.onShowExcludedChanged}
+                        text="Show Excluded Transactions"
+                      />
+                    </div>
+                  );
+              }
+            }}
+          />
         </div>
         <ContextMenu
           dataSource={categoriesContextMenu}

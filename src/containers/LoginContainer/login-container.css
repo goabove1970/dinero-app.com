@@ -1,5 +1,14 @@
+.flex-container {
+  display: flex;
+  justify-content: center;
+  /* align-self: center;    <---- REMOVE */
+  align-items: center; /* <---- NEW    */
+  margin-top: 100px;
+  /* background: silver; */
+}
+
 .login-content {
-  margin: auto;
+  /* margin: auto; */
   padding: 20px;
   background-color: rgba(191, 191, 191, 0.15);
   width: 250px;

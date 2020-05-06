@@ -78,26 +78,40 @@ const extendSession = (sessionId: string): Promise<SessionData> => {
   });
 };
 
+const getCookie = () => {
+  return document.cookie;
+};
+
 const sessionLoadPromise = new Promise<SessionData>((resolve, reject) => {
   try {
-    let sessionData = extractSessionData(document.cookie);
+    let sessionData = extractSessionData(getCookie());
     if (sessionData && sessionData.sessionId) {
+      console.log(`Extracted session ${sessionData.sessionId} from a coockie.`);
+      console.log(`Will try to extend session ${sessionData.sessionId}.`);
       resolve(
         extendSession(sessionData.sessionId).then((s) => {
+          if (s.sessionId) {
+            console.log(`Session ${sessionData.sessionId} has been extended.`);
+          } else {
+            console.log(`Session ${sessionData.sessionId} has expired.`);
+          }
           sessionData = s;
           return sessionData;
         })
       );
     } else {
+      console.log(`Could not extend session ${sessionData.sessionId}.`);
       resolve({});
     }
   } catch (e) {
+    console.log(`Error loading session data.`);
     reject(e);
   }
 });
 
 export const store = createStore<StoreState>(storeReducer, {
   session: {},
+  loginInProgress: true,
 });
 
 sessionLoadPromise
