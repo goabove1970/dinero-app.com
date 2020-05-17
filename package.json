@@ -1,5 +1,5 @@
 {
-  "name": "react-typescript-tutorial",
+  "name": "dinero-app",
   "version": "0.1.0",
   "private": true,
   "devDependencies": {
@@ -86,13 +86,19 @@
     "request": "^2.88.2",
     "request-promise": "^4.2.5",
     "typescript": "2.3.4",
-    "whatwg-fetch": "2.0.4"
+    "whatwg-fetch": "2.0.4",
+    "zip-folder": "^1.0.0"
   },
   "scripts": {
     "start": "node scripts/start.js",
     "build": "node scripts/build.js",
     "test": "node scripts/test.js --env=jsdom",
-    "inject": "node scripts/inject.js"
+    "inject": "node scripts/inject.js",
+    "pack": "node ./pack.js",
+    "release": "node ./release.js",
+    "patch": "./scripts/bump-patch.sh",
+    "minor": "./scripts/bump-minor.sh",
+    "major": "./scripts/bump-major.sh"
   },
   "jest": {
     "collectCoverageFrom": [
