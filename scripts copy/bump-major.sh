@@ -1,1 +1,0 @@
-grunt bump:major
