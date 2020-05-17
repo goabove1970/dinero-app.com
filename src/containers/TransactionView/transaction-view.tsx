@@ -1,7 +1,17 @@
 import * as React from 'react';
 
 import 'devextreme/data/odata/store';
-import DataGrid, { Column, Paging, Editing, Pager, Lookup, Sorting, GroupItem } from 'devextreme-react/data-grid';
+import DataGrid, {
+  Column,
+  Paging,
+  Editing,
+  Pager,
+  Lookup,
+  Sorting,
+  GroupItem,
+  SearchPanel,
+  HeaderFilter,
+} from 'devextreme-react/data-grid';
 import 'whatwg-fetch';
 import './transaction-view.css';
 import notify from 'devextreme/ui/notify';
@@ -28,12 +38,16 @@ import {
 import { category, categoryTreeNode } from '../../contracts/categoryTreeNode';
 import { CheckBox, Accordion, FileUploader, LoadIndicator, Popup } from 'devextreme-react';
 import { Label } from 'devextreme-react/form';
-import { AccountResponseModel } from '../../models/Account';
+import { AccountResponseModel, Account } from '../../models/Account';
 import { buildAccountsDataSource } from '../../dataSources/accountsDataSource';
 import { inspect } from 'util';
 import { renderMonthsIntervalButtonsRow } from '../common/months';
 import moment = require('moment');
+import { renderAccountsButtonsRow } from '../common/accountsRow';
+import { Transaction } from '../../models/transaction';
 // import { inspect } from 'util';
+
+const uploaderServiceUrl = 'http://localhost:9300/transactions/upload';
 
 export interface TransactionViewProps {
   userId?: string;
@@ -54,6 +68,7 @@ export interface TransactionViewState {
   selectedIntervalType?: TransactionIntervalType;
   transactionsForMonth?: Date;
   selectedCategorizationType: TransactionCategorizationType;
+  selectedAccountId?: string;
   selectedAccordionItems: AccordionItemWrapper[];
   showHidden: false;
   showExcluded: false;
@@ -62,6 +77,7 @@ export interface TransactionViewState {
   accounts?: AccountResponseModel[];
   uploadTransactionPopupVisible?: boolean;
   transactionImportInfo?: TransactionImportInfo;
+  selectedTransactions?: Transaction[];
 }
 
 const categoryReadTransformation = (loadedCategories: category[]): categoryTreeNode[] => {
@@ -79,7 +95,6 @@ export class TransactionViewElement extends React.Component<TransactionViewProps
   categoriesStore: { store: CustomStore };
   transactionsStore: { store: CustomStore };
   acctDataStore: { store: CustomStore };
-  selectedRowData: any;
   filteringOptionsAccordionItem: AccordionItemWrapper = {
     title: 'Filtering Options',
     type: 'filtering_options',
@@ -106,17 +121,17 @@ export class TransactionViewElement extends React.Component<TransactionViewProps
     this.onMonthChanged = this.onMonthChanged.bind(this);
     this.onTransactionIntervalChanged = this.onTransactionIntervalChanged.bind(this);
     this.onTransactionCategorizationChanged = this.onTransactionCategorizationChanged.bind(this);
-    this.itemClick = this.itemClick.bind(this);
-    this.contextMenuPerparing = this.contextMenuPerparing.bind(this);
+    this.contextMenuItemClick = this.contextMenuItemClick.bind(this);
     this.contextMenuItemRender = this.contextMenuItemRender.bind(this);
     this.onShowHiddenChanged = this.onShowHiddenChanged.bind(this);
     this.onShowExcludedChanged = this.onShowExcludedChanged.bind(this);
     this.buildTransactionContextMenuSource = this.buildTransactionContextMenuSource.bind(this);
-    this.isSelectedTransactionHidden = this.isSelectedTransactionHidden.bind(this);
     this.accordionSelectionChanged = this.accordionSelectionChanged.bind(this);
     this.showTransactionImportInfo = this.showTransactionImportInfo.bind(this);
     this.hideTransactionImportInfo = this.hideTransactionImportInfo.bind(this);
     this.onTransactionImportComplete = this.onTransactionImportComplete.bind(this);
+    this.onSelectedAccountChanged = this.onSelectedAccountChanged.bind(this);
+    this.transactionSelectionChanged = this.transactionSelectionChanged.bind(this);
   }
 
   onTransactionIntervalChanged(e: any) {
@@ -150,76 +165,92 @@ export class TransactionViewElement extends React.Component<TransactionViewProps
     this.setState({
       ...this.state,
       selectedCategorizationType: selectedCategorizationData.categorizationType,
+      // selectedAccountId: undefined,
     });
   }
 
-  itemClick(e: any) {
-    // console.log(`itemClick: ${JSON.stringify(e.itemData, null, 4)}`);
+  onSelectedAccountChanged(e: any) {
+    const selectedAcctData = e.component.option('elementAttr') as Account;
+    notify(`Requesting transactions for account ${selectedAcctData.alias}`);
+    this.setState({
+      ...this.state,
+      selectedAccountId: selectedAcctData.accountId,
+      // selectedCategorizationType: 'all',
+    });
+  }
+
+  contextMenuItemClick(e: any) {
+    // console.log(`contextMenuItemClick: ${inspect(e)}`);
+    console.log(`this.selectedTransactions: ${inspect(this.state.selectedTransactions)}`);
+
     const selectedMenuItem: ContextMenuItem = e.itemData;
-    const transaction =
-      (this.selectedRowData && this.selectedRowData.row && this.selectedRowData.row.data) || undefined;
-    if (!selectedMenuItem || !transaction) {
+    const transactions = this.state.selectedTransactions || [];
+    console.log(`contextMenuItemClick, transactions ${inspect(transactions)}`);
+    if (!selectedMenuItem || transactions.length === 0) {
       return;
     }
-    // console.log(`Selected transaction: ${inspect(transaction)}`);
 
-    const transactionId = transaction.transactionId;
     const categoryId: string | undefined = selectedMenuItem.id;
-
     switch (selectedMenuItem.itemType) {
-      case TransactionContextMenuItemType.moveToCategory:
+      case 'moveToCategory':
         {
-          // console.log(`Moving transaction ${transactionId} to category ${categoryId}`);
-          this.transactionsStore.store
-            .update(transactionId, {
-              categoryId,
-            })
-            .then(() => {
-              if (this.selectedRowData && this.selectedRowData.component) {
-                // console.log(`Refreshing component...`);
-                this.selectedRowData.component.refresh();
-              }
-            });
-        }
-        break;
-      case TransactionContextMenuItemType.hideUnhide:
-        {
-          // console.log(`Hiding/Unhiding transaction ${transactionId}`);
-          let hideUnhide = 'hide';
-          if (transaction.isHidden) {
-            hideUnhide = 'unhide';
+          console.log(`moveToCategory ${categoryId}`);
+          console.log(
+            `Moving transactions ${transactions.map((s) => s.transactionId).join(', ')} to category ${categoryId}`
+          );
+          const updatePromises: Promise<any>[] = [];
+          for (let i = 0; i < transactions.length; ++i) {
+            const transactionId = transactions[i].transactionId;
+            updatePromises.push(
+              this.transactionsStore.store.update(transactionId, {
+                categoryId,
+              })
+            );
           }
 
-          this.transactionsStore.store
-            .update(transactionId, {
-              statusModification: hideUnhide,
-            })
-            .then(() => {
-              if (this.selectedRowData && this.selectedRowData.component) {
-                // console.log(`Refreshing component...`);
-                this.selectedRowData.component.refresh();
-              }
-            });
+          Promise.all(updatePromises).then(() => {
+            console.log('Update promise resolved');
+            this.reloadTransactions();
+          });
         }
         break;
-      case TransactionContextMenuItemType.includeExclude:
+      case 'unhide':
+      case 'hide':
         {
+          const action = selectedMenuItem.itemType;
+          const updatePromises: Promise<any>[] = [];
+          for (let i = 0; i < transactions.length; ++i) {
+            const transactionId = transactions[i].transactionId;
+            updatePromises.push(
+              this.transactionsStore.store.update(transactionId, {
+                statusModification: action,
+              })
+            );
+          }
+
+          Promise.all(updatePromises).then(() => {
+            this.reloadTransactions();
+          });
+        }
+        break;
+      case 'include':
+      case 'exclude':
+        {
+          const action = selectedMenuItem.itemType;
           // console.log(`Including/Excluding transaction ${transactionId}`);
-          let includeExclude = 'exclude';
-          if (transaction.isExcluded) {
-            includeExclude = 'include';
+          const updatePromises: Promise<any>[] = [];
+          for (let i = 0; i < transactions.length; ++i) {
+            const transactionId = transactions[i].transactionId;
+            updatePromises.push(
+              this.transactionsStore.store.update(transactionId, {
+                statusModification: action,
+              })
+            );
           }
 
-          this.transactionsStore.store
-            .update(transactionId, {
-              statusModification: includeExclude,
-            })
-            .then(() => {
-              if (this.selectedRowData && this.selectedRowData.component) {
-                // console.log(`Refreshing component...`);
-                this.selectedRowData.component.refresh();
-              }
-            });
+          Promise.all(updatePromises).then(() => {
+            this.reloadTransactions();
+          });
         }
         break;
     }
@@ -268,15 +299,9 @@ export class TransactionViewElement extends React.Component<TransactionViewProps
     );
   }
 
-  isSelectedTransactionHidden() {
-    const transaction =
-      (this.selectedRowData && this.selectedRowData.row && this.selectedRowData.row.data) || undefined;
-    const hidden = (transaction && transaction.isHidden) || false;
-    return hidden;
-  }
-
-  contextMenuPerparing(e: any) {
-    this.selectedRowData = e;
+  transactionSelectionChanged(e: any) {
+    // console.log(`selectedTransactions: (${inspect(e.selectedRowsData)})`);
+    this.setState({ ...this.state, selectedTransactions: e.selectedRowsData });
   }
 
   buildTransactionContextMenuSource(userId?: string): TransactionContextMenuSource {
@@ -287,38 +312,38 @@ export class TransactionViewElement extends React.Component<TransactionViewProps
         load: function (e: any): Promise<any> {
           return loadCategoriesSource.store.load().then((categories: ContextMenuItem[]) => {
             const newMenu: ContextMenuItem[] = [];
-            const hideElement = {
+            const hideElement: ContextMenuItem = {
               text: 'Hide Transaction',
               id: 'hide',
-              itemType: TransactionContextMenuItemType.hideUnhide,
+              itemType: 'hide',
             };
-            const unhideElement = {
+            const unhideElement: ContextMenuItem = {
               text: 'Unhide Transaction',
               id: 'unhide',
-              itemType: TransactionContextMenuItemType.hideUnhide,
+              itemType: 'unhide',
             };
-            const excludeElement = {
+            const excludeElement: ContextMenuItem = {
               text: 'Exclude From Total',
               id: 'exclude',
-              itemType: TransactionContextMenuItemType.includeExclude,
+              itemType: 'exclude',
             };
-            const includeElement = {
+            const includeElement: ContextMenuItem = {
               text: 'Include In Total',
               id: 'include',
-              itemType: TransactionContextMenuItemType.includeExclude,
+              itemType: 'include',
             };
-            const visibility = {
+            const visibility: ContextMenuItem = {
               beginGroup: true,
               text: 'Visibility',
               id: 'visibility_menu',
-              itemType: TransactionContextMenuItemType.empty,
+              itemType: 'empty',
               items: [hideElement, unhideElement],
               icon: 'rowfield',
             };
-            const inclusion = {
+            const inclusion: ContextMenuItem = {
               text: 'Inclusion',
               id: 'inlusion_menu',
-              itemType: TransactionContextMenuItemType.empty,
+              itemType: 'empty',
               items: [excludeElement, includeElement],
               icon: 'datafield',
             };
@@ -334,14 +359,19 @@ export class TransactionViewElement extends React.Component<TransactionViewProps
     return source;
   }
 
-  componentDidMount() {
+  reloadTransactions() {
     this.acctDataStore.store.load().then((res) =>
       this.setState({
         ...this.state,
         accounts: res.data,
         accountsLoaded: true,
+        selectedTransactions: [],
       })
     );
+  }
+
+  componentDidMount() {
+    this.reloadTransactions();
   }
 
   buildTransUploader = (acc: AccountResponseModel) => {
@@ -357,8 +387,8 @@ export class TransactionViewElement extends React.Component<TransactionViewProps
           uploadMode={'instantly'}
           labelText={'or Drop transactions file here'}
           selectButtonText={`Imoprt to ${acctName}`}
-          uploadUrl={`http://localhost:9000/transactions/upload/${acc.accountId}`}
-          uploadMethod={'PUT'}
+          uploadUrl={`${uploaderServiceUrl}/${acc.accountId}`}
+          uploadMethod={'POST'}
           onUploaded={this.onTransactionImportComplete}
         />
       </div>
@@ -410,6 +440,7 @@ export class TransactionViewElement extends React.Component<TransactionViewProps
       showHidden: this.state.showHidden,
       showExcluded: this.state.showExcluded,
       userId: this.props.userId,
+      accountId: this.state.selectedAccountId,
     });
     const categoriesContextMenu = this.buildTransactionContextMenuSource(this.props.userId);
     this.acctDataStore = buildAccountsDataSource({ userId: this.props.userId });
@@ -423,31 +454,36 @@ export class TransactionViewElement extends React.Component<TransactionViewProps
             this.state.selectedCategorizationType,
             this.onTransactionCategorizationChanged
           )}
+          {renderAccountsButtonsRow(this.state.accounts, this.state.selectedAccountId, this.onSelectedAccountChanged)}
         </div>
-        <div className="transactions">
+        <div className="transactions-grid">
           <div className="caption">Transactions</div>
           <DataGrid
+            key={'transactionId'}
             dataSource={this.transactionsStore}
             columnAutoWidth={true}
             showBorders={true}
             showRowLines={true}
-            selection={{ mode: 'single' }}
+            selection={{ mode: 'multiple' }}
             hoverStateEnabled={true}
-            onContextMenuPreparing={this.contextMenuPerparing}
+            onSelectionChanged={this.transactionSelectionChanged}
+            selectedRowKeys={(this.state.selectedTransactions || []).map((t) => t.transactionId)}
           >
+            {/* <SearchPanel visible={true} width={240} placeholder="Search..." /> */}
             <Sorting></Sorting>
             {/* <Editing mode="row" allowUpdating={true} allowAdding={true}></Editing> */}
             <Paging defaultPageSize={50} />
             <Pager showPageSizeSelector={true} allowedPageSizes={[5, 10, 20, 100]} showInfo={true} />
             <Column
               dataField={'chaseTransaction.PostingDate'}
-              caption="Posting Date"
+              caption="Date"
               dataType="date"
               defaultSortOrder="desc"
               sortOrder="desc"
               sortIndex={0}
-              width={95}
+              width={90}
             />
+            <Column dataField={'importedDate'} caption="Imported" dataType="date" width={90} />
             <Column
               dataField={'chaseTransaction.Description'}
               caption="Description"
@@ -455,7 +491,9 @@ export class TransactionViewElement extends React.Component<TransactionViewProps
               dataType="asc"
               defaultSortOrder="asc"
               sortIndex={1}
-            />
+            >
+              {/* <HeaderFilter allowSearch={true} /> */}
+            </Column>
             <Column dataField={'chaseTransaction.BankDefinedCategory'} caption="Bank Category" width={100} />
             <Column dataField={'chaseTransaction.CreditCardTransactionType'} caption="Spending Type" width={80} />
             <Column dataField={'categoryId'} caption="Category" dataType="string" width={170}>
@@ -507,7 +545,7 @@ export class TransactionViewElement extends React.Component<TransactionViewProps
           dataSource={categoriesContextMenu}
           width={200}
           target=".dx-data-row"
-          onItemClick={this.itemClick}
+          onItemClick={this.contextMenuItemClick}
           //itemRender={this.contextMenuItemRender}
           animation={{
             show: { type: 'fade', from: 0, to: 1, duration: 100 },

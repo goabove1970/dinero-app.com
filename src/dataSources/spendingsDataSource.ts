@@ -1,6 +1,6 @@
 import CustomStore from 'devextreme/data/custom_store';
 import * as http from 'http';
-import CONFIG from '../../config';
+import CONFIG from '../config';
 import moment = require('moment');
 import { inspect } from 'util';
 
@@ -38,6 +38,7 @@ export const buildSpendingsDataSource = (args: SpendingsRequestArgs) => {
           },
         };
 
+        console.log(`Spending request: ${inspect(options)}`);
         return new Promise((resolve, reject) => {
           const req = http.request(options, (res) => {
             let buffer: Buffer;
@@ -50,11 +51,12 @@ export const buildSpendingsDataSource = (args: SpendingsRequestArgs) => {
             });
 
             res.on('end', () => {
-              // console.info(`Response: ${buffer}`);
               const data = JSON.parse(buffer.toString());
+              console.info(`Spendings response: ${inspect(data)}`);
               const response = {
                 parentCategories: data.categories,
                 subCatgories: data.subCatgories,
+                annualBalances: data.annualBalances,
               };
 
               const spendingProgression = data.spendingProgression.map((p: any) => {
@@ -64,11 +66,43 @@ export const buildSpendingsDataSource = (args: SpendingsRequestArgs) => {
                 };
               });
 
+              const annual = data.annualBalances.map((t: any) => {
+                return {
+                  ...t,
+                  month: moment(t.month).toDate(),
+                  saldo: t.credit - t.debit,
+                  cumDebit: 0,
+                  cumCredit: 0,
+                  cumSaldo: 0,
+                };
+              });
+              console.log(`Annual: ${inspect(annual)}`);
+              // sort annual asc
+              annual.sort((a1: any, a2: any) => {
+                return moment(a1).isBefore(a2) ? -1 : 1;
+              });
+              let cumDebit = 0;
+              let cumCredit = 0;
+              let cumSaldo = 0;
+              console.log(`annual.lenth = ${annual.lenth}`);
+
+              for (let i = 0; i < annual.length; ++i) {
+                cumDebit += annual[i].debit;
+                cumCredit += annual[i].credit;
+                cumSaldo += annual[i].saldo;
+                annual[i].cumDebit = cumDebit;
+                annual[i].cumCredit = cumCredit;
+                annual[i].cumSaldo = cumSaldo;
+                console.log(`annual[${i}].cumDebit: ${inspect(cumDebit)}`);
+              }
+              console.log(`Annual1: ${inspect(annual)}`);
+
               resolve({
                 parentCategories: response.parentCategories,
                 subCatgories: response.subCatgories,
                 spendingProgression,
                 spendingsByMonth: data.spendingsByMonth,
+                annualBalances: annual,
               });
             });
           });

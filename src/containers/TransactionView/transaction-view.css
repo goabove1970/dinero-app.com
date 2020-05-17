@@ -1,11 +1,11 @@
-.transactions,
+.transactions-grid,
 .transactions-span {
   padding: 20px;
-  background-color: rgba(191, 191, 191, 0.15);
+  /* background-color: rgba(191, 191, 191, 0.15); */
   margin-top: 20px;
 }
 
-.transactions > .caption,
+.transactions-grid > .caption,
 .transactions-span > .caption {
   font-weight: 500;
   margin-bottom: 20px;

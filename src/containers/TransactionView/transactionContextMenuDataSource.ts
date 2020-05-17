@@ -4,13 +4,14 @@ import { buildTreeShape } from '../../dataSources/categoriesDataSource';
 import { categoryTreeNode } from '../../contracts/categoryTreeNode';
 import CONFIG from '../../config';
 
-export enum TransactionContextMenuItemType {
-  moveToCategory,
-  hideUnhide,
-  includeExclude,
-  removeFromCalculations,
-  empty,
-}
+export type TransactionContextMenuItemType =
+  | 'moveToCategory'
+  | 'unhide'
+  | 'hide'
+  | 'include'
+  | 'exclude'
+  | 'removeFromCalculations'
+  | 'empty';
 
 export interface ContextMenuItem {
   text: string;
@@ -28,7 +29,7 @@ const categoryTreeShapeToDoubleLevelMenu = (tree: categoryTreeNode[]): ContextMe
       text: e.caption,
       id: e.categoryId,
       items: [],
-      itemType: TransactionContextMenuItemType.moveToCategory,
+      itemType: 'moveToCategory',
     };
     upperLevel.push(contextMenuItem);
     if (e.items && e.items.length) {
@@ -36,7 +37,7 @@ const categoryTreeShapeToDoubleLevelMenu = (tree: categoryTreeNode[]): ContextMe
         const contextMenuSubItem: ContextMenuItem = {
           text: se.caption,
           id: se.categoryId,
-          itemType: TransactionContextMenuItemType.moveToCategory,
+          itemType: 'moveToCategory',
         };
         contextMenuItem.items!.push(contextMenuSubItem);
       });

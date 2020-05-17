@@ -1,6 +1,7 @@
 import { SessionData } from '../types';
 import CONFIG from '../config';
 import * as http from 'http';
+import { inspect } from 'util';
 
 export const doLogin = (user: string, password: string): Promise<SessionData> => {
   const reqBody = {
@@ -25,6 +26,8 @@ export const doLogin = (user: string, password: string): Promise<SessionData> =>
 
   // console.log(`request transactions options: ${JSON.stringify(options, null, 4)}`);
 
+  console.info(`Loging in: ${inspect(bodyString)}`);
+
   return new Promise((resolve, reject) => {
     const req = http.request(options, (res) => {
       let buffer: Buffer;
@@ -37,8 +40,8 @@ export const doLogin = (user: string, password: string): Promise<SessionData> =>
       });
 
       res.on('end', () => {
-        // console.info(`Response: ${buffer}`);
         const data = JSON.parse(buffer.toString());
+        console.info(`Login response: ${inspect(data)}`);
         if (data.error) {
           reject(data.error);
         } else {

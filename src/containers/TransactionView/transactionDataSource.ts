@@ -31,10 +31,6 @@ export const buildTransactionDataSource = (args: TransactionRequestArgs) => {
           action: 'read-transactions',
           args: {
             transactionId: key,
-            userId: args.userId,
-            startDate: args.startDate,
-            endDate: args.endDate,
-            categorization: args.categorization,
           },
         };
         const bodyString = JSON.stringify(reqBody);
@@ -90,7 +86,7 @@ export const buildTransactionDataSource = (args: TransactionRequestArgs) => {
 
       load: function () {
         // console.log(`loadOptions: ${JSON.stringify(args, null, 4)}`);
-        const reqBody = {
+        const reqBody: any = {
           action: 'read-transactions',
           args: {
             // accountId: 'dadcefdd-b198-08cf-b396-7cf044631d32',
@@ -98,9 +94,14 @@ export const buildTransactionDataSource = (args: TransactionRequestArgs) => {
             endDate: args.endDate,
             categorization: args.categorization,
             categoryId: args.categoryId,
-            userId: args.userId,
           },
         };
+
+        if (args.accountId) {
+          reqBody.args = { ...reqBody.args, accountId: args.accountId };
+        } else if (args.userId) {
+          reqBody.args = { ...reqBody.args, userId: args.userId };
+        }
         const bodyString = JSON.stringify(reqBody);
 
         const options = {

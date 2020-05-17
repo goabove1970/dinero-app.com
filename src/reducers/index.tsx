@@ -22,9 +22,13 @@ export function storeReducer(state: StoreState, action: AuthActions): StoreState
     case LOGIN_REQUESTED:
       const { login, password } = action.payload;
       // console.log(`Login requested, login: ${login}, password: ${password}`);
-      doLogin(login, password).then((data) => {
-        getStore().dispatch(loginDataReceived(data));
-      });
+      doLogin(login, password)
+        .then((data) => {
+          getStore().dispatch(loginDataReceived(data));
+        })
+        .catch((e) => {
+          console.error(e.message || e);
+        });
       return { ...state, loginInProgress: true };
 
     case LOGOUT_REQUESTED:

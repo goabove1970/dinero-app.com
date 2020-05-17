@@ -3,7 +3,6 @@ import * as React from 'react';
 import 'devextreme/data/odata/store';
 import 'whatwg-fetch';
 import './spendings-view.css';
-import { buildSpendingsDataSource } from './spendingsDataSource';
 import {
   TransactionIntervalType,
   TransactionIntervalSelectionOption,
@@ -32,9 +31,10 @@ import {
 import { LoadIndicator } from 'devextreme-react';
 import moment = require('moment');
 import { renderMonthsIntervalButtonsRow } from '../common/months';
-import { SpendingsMonthlyResponse } from '../../models/Spendings';
-import MonthlyCategoriesElement from './MontlyCategories';
+import { SpendingsMonthlyResponse, SpendingServiceResponse } from '../../models/Spendings';
+import MonthlyCategoriesElement from '../MontlyCategories';
 import { inspect } from 'util';
+import { buildSpendingsDataSource } from '../../dataSources/spendingsDataSource';
 
 export interface SpendingsViewProps {
   accountId?: string;
@@ -54,22 +54,13 @@ export interface SpendingsViewState {
   selectedCategoryId?: string;
   selectedCategoryName?: string;
   categoriesItems?: categoryTreeNode[];
-  transactions?: any[];
   debitCategories: any[];
   creditCategories: any[];
   categoriesItemsLoaded?: boolean;
-  transactionsLoaded?: boolean;
   spendingsLoaded?: boolean;
   startDate?: Date;
   endDate?: Date;
   spendings: SpendingServiceResponse;
-}
-
-export interface SpendingServiceResponse {
-  parentCategories: any[];
-  subCatgories: any[];
-  spendingProgression: any[];
-  spendingsByMonth?: SpendingsMonthlyResponse;
 }
 
 const categoryReadTransformation = (loadedCategories: category[]): categoryTreeNode[] => {
@@ -85,7 +76,6 @@ const categoryReadTransformation = (loadedCategories: category[]): categoryTreeN
 
 export class SpendingsViewElement extends React.Component<SpendingsViewProps, SpendingsViewState> {
   selectedRowData: any;
-  spendingProgressionTypes: string[];
   spendingsLines = [
     { value: 'credit', name: 'Credit', color: 'blue' },
     { value: 'debit', name: 'Debit', color: 'yellow' },
@@ -108,7 +98,6 @@ export class SpendingsViewElement extends React.Component<SpendingsViewProps, Sp
       creditCategories: [],
     };
 
-    this.spendingProgressionTypes = ['spline', 'stackedspline', 'fullstackedspline'];
     this.onTransactionIntervalChanged = this.onTransactionIntervalChanged.bind(this);
     this.onPiePointClick = this.onPiePointClick.bind(this);
     this.onMonthIntervalChanged = this.onMonthIntervalChanged.bind(this);
@@ -116,7 +105,6 @@ export class SpendingsViewElement extends React.Component<SpendingsViewProps, Sp
     this.categoryChanged = this.categoryChanged.bind(this);
     this.refreshStartEndDate = this.refreshStartEndDate.bind(this);
     this.refreshSpendings = this.refreshSpendings.bind(this);
-    this.refreshTransactions = this.refreshTransactions.bind(this);
   }
 
   onTransactionIntervalChanged(e: any) {
@@ -129,12 +117,10 @@ export class SpendingsViewElement extends React.Component<SpendingsViewProps, Sp
       transactionsForMonth: newStartMonth,
       selectedIntervalType: newSelectedIntervalType,
       spendingsLoaded: false,
-      transactionsLoaded: false,
     });
 
     const dates = this.refreshStartEndDate(newSelectedIntervalType, newStartMonth);
     this.refreshSpendings(dates.startDate, dates.endDate);
-    this.refreshTransactions(dates.startDate, dates.endDate);
   }
 
   onMonthIntervalChanged(e: any) {
@@ -148,12 +134,10 @@ export class SpendingsViewElement extends React.Component<SpendingsViewProps, Sp
       transactionsForMonth: newStartMonth,
       selectedIntervalType: newSelectedIntervalType,
       spendingsLoaded: false,
-      transactionsLoaded: false,
     });
 
     const dates = this.refreshStartEndDate(newSelectedIntervalType, newStartMonth);
     this.refreshSpendings(dates.startDate, dates.endDate);
-    this.refreshTransactions(dates.startDate, dates.endDate);
   }
 
   categoryChanged(selectedCategoryId: string | undefined, spendings: SpendingServiceResponse): SpendingsData {
@@ -162,9 +146,9 @@ export class SpendingsViewElement extends React.Component<SpendingsViewProps, Sp
       creditCategories: [],
     };
     if (selectedCategoryId) {
-      let subs = spendings.subCatgories.filter((c: any) => c.parentCategoryId === selectedCategoryId);
+      let subs = (spendings.subCatgories || []).filter((c: any) => c.parentCategoryId === selectedCategoryId);
       // console.log(`subs: ${inspect(subs)}`);
-      const parent = spendings.parentCategories.filter((c: any) => c.categoryId === selectedCategoryId)[0];
+      const parent = (spendings.parentCategories || []).filter((c: any) => c.categoryId === selectedCategoryId)[0];
       if (parent) {
         // console.log(`Parents: ${inspect(parent)}`);
         const totalSubCredit = subs.reduce(
@@ -199,12 +183,12 @@ export class SpendingsViewElement extends React.Component<SpendingsViewProps, Sp
           return a.credit - b.credit;
         });
     } else {
-      data.debitCategories = spendings.parentCategories
+      data.debitCategories = (spendings.parentCategories || [])
         .filter((cs: any) => cs.debit > 0)
         .sort((a: any, b: any) => {
           return a.debit - b.debit;
         });
-      data.creditCategories = spendings.parentCategories
+      data.creditCategories = (spendings.parentCategories || [])
         .filter((cs: any) => cs.credit > 0)
         .sort((a: any, b: any) => {
           return a.credit - b.credit;
@@ -281,32 +265,13 @@ export class SpendingsViewElement extends React.Component<SpendingsViewProps, Sp
 
     source.store.load().then((res: SpendingServiceResponse) => {
       const data = this.categoryChanged(this.state.selectedCategoryId, res);
-      // console.log(`RES: ${inspect(res)}`);
+      console.log(`SpendingServiceResponse: ${inspect(res)}`);
       this.setState({
         ...this.state,
         spendings: res,
         debitCategories: data.debitCategories,
         creditCategories: data.creditCategories,
         spendingsLoaded: true,
-      });
-    });
-  }
-
-  refreshTransactions(startDate?: Date, endDate?: Date) {
-    const transactionsStore = buildTransactionDataSource({
-      startDate,
-      endDate,
-      categoryId: this.state.selectedCategoryId,
-      showHidden: false,
-      showExcluded: false,
-      userId: this.props.userId,
-    });
-
-    transactionsStore.store.load().then((data) => {
-      this.setState({
-        ...this.state,
-        transactions: data.data,
-        transactionsLoaded: true,
       });
     });
   }
@@ -325,14 +290,12 @@ export class SpendingsViewElement extends React.Component<SpendingsViewProps, Sp
       })
     );
 
-    //////        LOADING TRANSACTIONS        //////
-    this.refreshTransactions(dates.startDate, dates.endDate);
-
     //////        LOADING SPENDINGS        //////
     this.refreshSpendings(dates.startDate, dates.endDate);
   }
 
   render(): JSX.Element {
+    console.log(`this.state.spendings: ${inspect(this.state.spendings && this.state.spendings.annualBalances)}`);
     // console.log(`transactions: ${inspect(this.state.transactions)}`);
     // console.log(`debitCategories: ${inspect(this.state.debitCategories)}`);
     // console.log(`this.state.spendings.spendingsByMonth: ${inspect(this.state.spendings.spendingsByMonth)}`);
@@ -340,7 +303,7 @@ export class SpendingsViewElement extends React.Component<SpendingsViewProps, Sp
     return (
       <div className="spendings-content">
         <div className="transactions-span">
-          <div className="caption">Transactions Span</div>
+          <div className="caption">Select Period</div>
           {renderIntervalButtonsRow(this.state.selectedIntervalType, this.onTransactionIntervalChanged)}
           {renderMonthsIntervalButtonsRow(this.state.transactionsForMonth, this.onMonthIntervalChanged)}
         </div>
@@ -389,6 +352,136 @@ export class SpendingsViewElement extends React.Component<SpendingsViewProps, Sp
           </div>
         )}
 
+        {/* Annual spendings by month, as a LINE (SALDO)*/}
+        {this.state.spendings && this.state.spendings.annualBalances && (
+          <div className="annual-balances">
+            <div className="caption">Monthly Balances</div>
+            <Chart
+              id="chart"
+              // title="Credit vs Debit, Monthly"
+              dataSource={this.state.spendings.annualBalances}
+              onPointClick={(e: any) => {
+                e.target.select();
+              }}
+            >
+              <CommonSeriesSettings
+                argumentField="month"
+                // type="bar"
+                hoverMode="allArgumentPoints"
+                selectionMode="allArgumentPoints"
+                type={'spline'}
+              >
+                <Label visible={true}>
+                  <Format type="fixedPoint" precision={0} />
+                </Label>
+              </CommonSeriesSettings>
+              {/* <Series valueField="credit" name="Credit" /> */}
+              {/* <Series valueField="debit" name="Debit" /> */}
+              <Series valueField="saldo" name="Blance" />
+              <Legend verticalAlignment="bottom" horizontalAlignment="center"></Legend>
+              <Tooltip enabled={true} />
+            </Chart>
+          </div>
+        )}
+
+        {/* Annual spendings by month, as a BAR (DEBIT, CREDIT)*/}
+        {this.state.spendings && this.state.spendings.annualBalances && (
+          <div className="annual-balances">
+            <div className="caption">Monthly Income vs Spendings</div>
+            <Chart
+              id="chart"
+              // title="Credit vs Debit, Monthly"
+              dataSource={this.state.spendings.annualBalances}
+              onPointClick={(e: any) => {
+                e.target.select();
+              }}
+            >
+              <CommonSeriesSettings
+                argumentField="month"
+                type="bar"
+                hoverMode="allArgumentPoints"
+                selectionMode="allArgumentPoints"
+                barPadding={2.9}
+
+                //type={'spline'}
+              >
+                {/* <Label visible={true}>
+                  <Format type="fixedPoint" precision={0} />
+                </Label> */}
+              </CommonSeriesSettings>
+              <Series valueField="credit" name="Credit" />
+              <Series valueField="debit" name="Debit" />
+              {/* <Series valueField="saldo" name="Blance" /> */}
+              <Legend verticalAlignment="bottom" horizontalAlignment="center"></Legend>
+              <Tooltip enabled={true} />
+            </Chart>
+          </div>
+        )}
+
+        {/* Cumulative debit vs credit LINE (DEBIT, CREDIT)*/}
+        {this.state.spendings && this.state.spendings.annualBalances && (
+          <div className="annual-balances">
+            <div className="caption">Cumulative Income vs Spendings</div>
+            <Chart
+              id="chart"
+              // title="Credit vs Debit, Monthly"
+              dataSource={this.state.spendings.annualBalances}
+              onPointClick={(e: any) => {
+                e.target.select();
+              }}
+            >
+              <CommonSeriesSettings
+                argumentField="month"
+                // type="bar"
+                hoverMode="allArgumentPoints"
+                selectionMode="allArgumentPoints"
+                type={'spline'}
+              >
+                <Label visible={true}>
+                  <Format type="fixedPoint" precision={0} />
+                </Label>
+              </CommonSeriesSettings>
+              <Series valueField="cumCredit" name="Credit" />
+              <Series valueField="cumDebit" name="Debit" />
+              {/* <Series valueField="saldo" name="Blance" /> */}
+              <Legend verticalAlignment="bottom" horizontalAlignment="center"></Legend>
+              <Tooltip enabled={true} />
+            </Chart>
+          </div>
+        )}
+
+        {/* Cumulative debit vs credit LINE (DEBIT, CREDIT)*/}
+        {this.state.spendings && this.state.spendings.annualBalances && (
+          <div className="annual-balances">
+            <div className="caption">Cumulative Balance</div>
+            <Chart
+              id="chart"
+              // title="Credit vs Debit, Monthly"
+              dataSource={this.state.spendings.annualBalances}
+              onPointClick={(e: any) => {
+                e.target.select();
+              }}
+            >
+              <CommonSeriesSettings
+                argumentField="month"
+                // type="bar"
+                hoverMode="allArgumentPoints"
+                selectionMode="allArgumentPoints"
+                type={'spline'}
+              >
+                <Label visible={true}>
+                  <Format type="fixedPoint" precision={0} />
+                </Label>
+              </CommonSeriesSettings>
+              {/* <Series valueField="cumCredit" name="Credit" /> */}
+              {/* <Series valueField="cumDebit" name="Debit" /> */}
+              <Series valueField="cumSaldo" name="Blance" />
+              <Legend verticalAlignment="bottom" horizontalAlignment="center"></Legend>
+              <Tooltip enabled={true} />
+            </Chart>
+          </div>
+        )}
+
         {this.state.creditCategories && this.state.creditCategories.length > 0 && (
           <div className="pie">
             <div className="caption">
@@ -422,7 +515,7 @@ export class SpendingsViewElement extends React.Component<SpendingsViewProps, Sp
           </div>
         )}
 
-        {this.state.transactions && this.state.transactions.length > 0 && (
+        {
           <div className="income-spendings">
             <div className="caption">Income vs Spendings</div>
             <div>
@@ -449,7 +542,7 @@ export class SpendingsViewElement extends React.Component<SpendingsViewProps, Sp
                       />
                     );
                   })}
-                  <Margin bottom={20} />
+                  {/* <Margin bottom={20} /> */}
                   <ArgumentAxis allowDecimals={false} axisDivisionFactor={60}></ArgumentAxis>
                   <Legend verticalAlignment="top" horizontalAlignment="right" />
                   <Tooltip enabled={true} />
@@ -457,37 +550,7 @@ export class SpendingsViewElement extends React.Component<SpendingsViewProps, Sp
               )}
             </div>
           </div>
-        )}
-
-        <div className="transactions">
-          <div className="caption">Transactions</div>
-          <div>
-            <DataGrid
-              dataSource={this.state.transactions}
-              columnAutoWidth={true}
-              showBorders={true}
-              showRowLines={true}
-              selection={{ mode: 'single' }}
-              hoverStateEnabled={true}
-            >
-              <Paging defaultPageSize={10} />
-              <Pager showPageSizeSelector={true} allowedPageSizes={[5, 10, 20, 100]} showInfo={true} />
-              <Column
-                dataField={'chaseTransaction.PostingDate'}
-                caption="Posting Date"
-                dataType="date"
-                defaultSortOrder="desc"
-                sortOrder="desc"
-                width={95}
-              />
-              <Column dataField={'chaseTransaction.Description'} caption="Description" />
-              <Column dataField={'categoryId'} caption="Category" dataType="string" width={100}>
-                <Lookup dataSource={this.state.categoriesItems || []} valueExpr="categoryId" displayExpr="caption" />
-              </Column>
-              <Column dataField={'chaseTransaction.Amount'} caption="Amount" width={80} />
-            </DataGrid>
-          </div>
-        </div>
+        }
       </div>
     );
   }

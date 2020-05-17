@@ -11,6 +11,7 @@ import CONFIG from './config';
 
 import './index.css';
 import { sessionDataLoaded } from './actions';
+import { inspect } from 'util';
 
 const extractSessionData = (data?: string): SessionData => {
   let session: SessionData = {};
@@ -44,6 +45,7 @@ const extendSession = (sessionId: string): Promise<SessionData> => {
     },
   };
 
+  console.log(`Session request: ${inspect(options)}`);
   return new Promise((resolve, reject) => {
     const req = http.request(options, (res) => {
       let buffer: Buffer;
@@ -57,8 +59,8 @@ const extendSession = (sessionId: string): Promise<SessionData> => {
 
       res.on('end', () => {
         const data = JSON.parse(buffer.toString());
+        console.info(`Categories response: ${inspect(data)}`);
         if (data.error) {
-          // logged-out, expired or invalid sessionId {
           resolve({});
         } else {
           const sessionData = data.payload.session as SessionData;
@@ -90,13 +92,18 @@ const sessionLoadPromise = new Promise<SessionData>((resolve, reject) => {
       console.log(`Will try to extend session ${sessionData.sessionId}.`);
       resolve(
         extendSession(sessionData.sessionId).then((s) => {
-          if (s.sessionId) {
-            console.log(`Session ${sessionData.sessionId} has been extended.`);
-          } else {
-            console.log(`Session ${sessionData.sessionId} has expired.`);
+          try {
+            if (s.sessionId) {
+              console.log(`Session ${sessionData.sessionId} has been extended.`);
+            } else {
+              console.log(`Session ${sessionData.sessionId} has expired.`);
+            }
+            sessionData = s;
+            return sessionData;
+          } catch (e) {
+            console.error(e.message || e);
+            throw e;
           }
-          sessionData = s;
-          return sessionData;
         })
       );
     } else {

@@ -3,12 +3,12 @@ import * as React from 'react';
 import 'devextreme/data/odata/store';
 import 'whatwg-fetch';
 import './monthly-categories.css';
-import { SpendingsMonthlyResponse, MonthlyCategorySpending } from '../../../models/Spendings';
 import moment = require('moment');
 import { inspect } from 'util';
 import { DataGrid, Chart } from 'devextreme-react';
 import { Column } from 'devextreme-react/data-grid';
 import { Tooltip, CommonSeriesSettings, SeriesTemplate, Label, Format } from 'devextreme-react/chart';
+import { SpendingsMonthlyResponse, MonthlyCategorySpending } from '../../models/Spendings';
 
 interface MonthlyCategoriesProps {
   spendings: SpendingsMonthlyResponse;

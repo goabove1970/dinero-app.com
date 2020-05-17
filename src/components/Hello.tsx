@@ -1,201 +1,20 @@
 import * as React from 'react';
-// import React from 'react';
 import './Hello.css';
 import TransactionViewElement from '../containers/TransactionView';
 import CategoryViewElement from '../containers/CategoryView';
-// import { Props } from './Props';
-
-import TreeView from 'devextreme-react/tree-view';
 import CustomStore from 'devextreme/data/custom_store';
-import * as http from 'http';
 import BusinessViewElement from '../containers/BusinessView';
-import CONFIG from '../config';
 import SpendingsViewElement from '../containers/SpendingsView';
 import AccountsViewElement from '../containers/AccountsView';
-// import { inspect } from 'util';
 import LoginElement from '../containers/LoginContainer';
 import { getStore } from '..';
 import { loginRequested } from '../actions';
 import { LoadIndicator, Menu } from 'devextreme-react';
 import { Props } from '../containers/Hello';
-
-export enum TreeMenuItemType {
-  Transactions,
-  BankConnections,
-  Accounts,
-  Categories,
-  SubCategories,
-  Businesses,
-  Spendings,
-  ManageAccount,
-  SignOut,
-  ImportTransactions,
-}
-
-export interface MainMenyItem {
-  // id: string;
-  text: string;
-  expanded: boolean;
-  element: TreeMenuItemType;
-  items?: MainMenyItem[];
-}
-
-export interface TopMenuItem {
-  text: string;
-  type: TreeMenuItemType;
-  items?: TopMenuItem[];
-  onClick: () => void;
-}
-
-const categoriesMenuItem = {
-  // id: '2',
-  text: 'Categories',
-  expanded: false,
-  element: TreeMenuItemType.Categories,
-  items: [],
-};
-
-const businessesMenuItem = {
-  // id: '3',
-  text: 'Businesses',
-  expanded: false,
-  element: TreeMenuItemType.Businesses,
-  items: [],
-};
-
-const spendingsMenuItem = {
-  // id: '2',
-  text: 'Spendings',
-  expanded: false,
-  element: TreeMenuItemType.Spendings,
-  items: [],
-};
-
-const accountsMenuItem = {
-  // id: '2',
-  text: 'Bank Accounts',
-  expanded: false,
-  element: TreeMenuItemType.Accounts,
-  items: [],
-};
-
-const signOutMenuItem = {
-  // id: '2',
-  text: 'Sign Out',
-  expanded: false,
-  element: TreeMenuItemType.SignOut,
-  items: [],
-};
-
-const myAccountMenuItem = {
-  // id: '2',
-  text: 'My Accounts',
-  expanded: false,
-  element: TreeMenuItemType.ManageAccount,
-  items: [signOutMenuItem],
-};
-
-export const menuItemsSource: MainMenyItem[] = [
-  spendingsMenuItem,
-  {
-    // id: '1',
-    text: 'Transactions',
-    expanded: false,
-    element: TreeMenuItemType.Transactions,
-  },
-  categoriesMenuItem,
-  accountsMenuItem,
-  businessesMenuItem,
-  myAccountMenuItem,
-];
-
-interface category {
-  caption: string;
-  categoryId: string;
-  parentCategoryId: string;
-  addedToTree?: boolean;
-}
-
-function topLevelCategoriesNodes(
-  cats: category[]
-): {
-  text: string;
-  expanded: boolean;
-  element: TreeMenuItemType;
-  items?: any[];
-}[] {
-  return cats
-    .filter((c) => c.parentCategoryId === undefined)
-    .map((c) => {
-      return {
-        text: c.caption,
-        expanded: false,
-        element: TreeMenuItemType.SubCategories,
-      };
-    });
-}
-
-const categoriesReadDataSource = (userId?: string) => {
-  return {
-    store: new CustomStore({
-      load: function (loadOptions) {
-        const reqBody = {
-          action: 'read',
-          args: userId
-            ? {
-                userId,
-              }
-            : {},
-        };
-        const bodyString = JSON.stringify(reqBody);
-
-        const options = {
-          method: 'POST',
-          hostname: CONFIG.serviceUrl,
-          port: CONFIG.port,
-          path: '/categories',
-          headers: {
-            'content-type': 'application/json',
-            'content-length': Buffer.byteLength(bodyString),
-          },
-        };
-
-        // console.log(`request options: ${JSON.stringify(options, null, 4)}`);
-
-        return new Promise((resolve, reject) => {
-          const req = http.request(options, (res) => {
-            let buffer: Buffer;
-            res.on('data', (chunk: Buffer) => {
-              if (!buffer) {
-                buffer = chunk;
-              } else {
-                buffer = Buffer.concat([buffer, chunk]);
-              }
-            });
-
-            res.on('end', () => {
-              // console.info(`Response: ${buffer}`);
-              const data = JSON.parse(buffer.toString());
-              const topLevel = topLevelCategoriesNodes(data.payload.categories);
-              // console.log(JSON.stringify(topLevel, null, 4));
-              resolve(topLevel);
-            });
-          });
-
-          req.on('error', (err) => {
-            console.error(`Error: ${err.message || err}`);
-            reject(err);
-          });
-
-          // console.log(`Posting request: ${bodyString}`);
-          req.write(bodyString);
-          req.end();
-        });
-      },
-      key: 'categoryId',
-    }),
-  };
-};
+import BankConnectionsViewElement from '../containers/BankConnections';
+import AnnualTrendsViewElement from '../containers/AnnualTrendsView';
+import { TreeMenuItemType, MainMenyItem, TopMenuItem, menuItemsSource, categoriesMenuItem } from './model';
+import { categoriesReadDataSource } from './categoriesReadDataSource';
 
 interface MainMenuState {
   selectedMenuItem: MainMenyItem;
@@ -214,7 +33,6 @@ export class Hello extends React.Component<Props, MainMenuState> {
       topMenuSelectedItemType: TreeMenuItemType.Spendings,
     };
 
-    // this.handleTreeViewSelectionChange = this.handleTreeViewSelectionChange.bind(this);
     this.handleTopMenuSelectionChange = this.handleTopMenuSelectionChange.bind(this);
     this.renderTreeContent = this.renderTreeContent.bind(this);
   }
@@ -308,10 +126,18 @@ export class Hello extends React.Component<Props, MainMenuState> {
     },
   };
 
+  topViewAnnualTrendsMenuItem: TopMenuItem = {
+    text: 'Annual Trends',
+    type: TreeMenuItemType.AnnualTrends,
+    onClick: () => {
+      this.handleTopMenuSelectionChange(this.topViewAnnualTrendsMenuItem);
+    },
+  };
+
   topSpendingsMenuItem: TopMenuItem = {
     text: 'Spendings',
     type: TreeMenuItemType.Spendings,
-    items: [this.topViewSpendingsMenuItem, this.topCategoriesMenuItem],
+    items: [this.topViewAnnualTrendsMenuItem, this.topViewSpendingsMenuItem, this.topCategoriesMenuItem],
     onClick: () => {
       this.handleTopMenuSelectionChange(this.topViewSpendingsMenuItem);
     },
@@ -320,13 +146,12 @@ export class Hello extends React.Component<Props, MainMenuState> {
   topMenuItems = [this.topSpendingsMenuItem, this.topTransactionsMenuItem, this.topMyAccountMenuItem];
 
   render() {
-    // console.log(`Rendering... state: ${JSON.stringify(this.state, null, 4)}`);
     if (this.props && this.props.userId) {
       const userId = this.props.userId;
       if (!this.customStore) {
         this.customStore = {
           store: new CustomStore({
-            load: function (loadOptions) {
+            load: function () {
               const categoriesStore = categoriesReadDataSource(userId);
               return categoriesStore.store.load().then((items) => {
                 categoriesMenuItem.items = items;
@@ -360,14 +185,6 @@ export class Hello extends React.Component<Props, MainMenuState> {
               />
             </div>
             <div className="container">
-              {/* <div className="left-content">
-                <TreeView
-                  selectionMode="single"
-                  selectByClick={true}
-                  onItemSelectionChanged={this.handleTreeViewSelectionChange}
-                  dataSource={this.customStore}
-                />
-              </div> */}
               <div className="right-content">{this.renderTreeContent()}</div>
             </div>
           </div>
@@ -402,17 +219,13 @@ export class Hello extends React.Component<Props, MainMenuState> {
         return <SpendingsViewElement userId={this.props.userId} />;
       case TreeMenuItemType.Accounts:
         return <AccountsViewElement userId={this.props.userId} />;
+      case TreeMenuItemType.BankConnections:
+        return <BankConnectionsViewElement userId={this.props.userId!} />;
+      case TreeMenuItemType.AnnualTrends:
+        return <AnnualTrendsViewElement userId={this.props.userId!} />;
     }
     return undefined;
   }
-
-  // handleTreeViewSelectionChange(e: any) {
-  //   const selectedMenuItem: MainMenyItem = e.itemData;
-
-  //   this.setState({
-  //     selectedMenuItem: selectedMenuItem,
-  //   });
-  // }
 
   handleTopMenuSelectionChange(e: TopMenuItem) {
     this.setState({
