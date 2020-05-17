@@ -1,11 +1,13 @@
 {
-    "extends": [],
-    "defaultSeverity": "warning",
-    "linterOptions": {
-      "exclude": [
-        "config/**/*.js",
-        "node_modules/**/*.ts"
-      ]
-    }
+  "extends": [],
+  "rules": {
+    "no-empty": true
+  },
+  "jsRules": {
+    "no-empty": true
+  },
+  "defaultSeverity": "warning",
+  "linterOptions": {
+    "exclude": ["config/**/*.js", "node_modules/**/*.ts"]
   }
-  
+}
