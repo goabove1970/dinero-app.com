@@ -1,18 +1,9 @@
 import * as React from 'react';
 
 import 'devextreme/data/odata/store';
-import DataGrid, {
-  Column,
-  Paging,
-  Editing,
-  Pager,
-  Lookup,
-  Sorting,
-  GroupItem,
-  SearchPanel,
-  HeaderFilter,
-} from 'devextreme-react/data-grid';
+import DataGrid, { Column, Paging, Pager, Lookup, Sorting } from 'devextreme-react/data-grid';
 import 'whatwg-fetch';
+
 import './transaction-view.css';
 import notify from 'devextreme/ui/notify';
 import { buildTransactionDataSource } from './transactionDataSource';
@@ -30,14 +21,9 @@ import {
 } from '../common/categorization';
 import { buildCategoriesDataSource } from '../../dataSources/categoriesDataSource';
 import CustomStore from 'devextreme/data/custom_store';
-import {
-  buildTransactionContextMenuDataSource,
-  ContextMenuItem,
-  TransactionContextMenuItemType,
-} from './transactionContextMenuDataSource';
+import { buildTransactionContextMenuDataSource, ContextMenuItem } from './transactionContextMenuDataSource';
 import { category, categoryTreeNode } from '../../contracts/categoryTreeNode';
 import { CheckBox, Accordion, FileUploader, LoadIndicator, Popup } from 'devextreme-react';
-import { Label } from 'devextreme-react/form';
 import { AccountResponseModel, Account } from '../../models/Account';
 import { buildAccountsDataSource } from '../../dataSources/accountsDataSource';
 import { inspect } from 'util';
@@ -309,7 +295,7 @@ export class TransactionViewElement extends React.Component<TransactionViewProps
     const loadCategoriesSource = buildTransactionContextMenuDataSource(userId);
     const source: TransactionContextMenuSource = {
       store: new CustomStore({
-        load: function (e: any): Promise<any> {
+        load: function (): Promise<any> {
           return loadCategoriesSource.store.load().then((categories: ContextMenuItem[]) => {
             const newMenu: ContextMenuItem[] = [];
             const hideElement: ContextMenuItem = {

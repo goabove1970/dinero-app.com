@@ -24,9 +24,7 @@ export const doLogin = (user: string, password: string): Promise<SessionData> =>
     },
   };
 
-  // console.log(`request transactions options: ${JSON.stringify(options, null, 4)}`);
-
-  console.info(`Loging in: ${inspect(bodyString)}`);
+  console.log(`Login request options: ${inspect(options)}`);
 
   return new Promise((resolve, reject) => {
     const req = http.request(options, (res) => {

@@ -1,8 +1,7 @@
 import * as React from 'react';
 
 import 'devextreme/data/odata/store';
-import { TreeList, Column, Editing, ValidationRule, Lookup } from 'devextreme-react/tree-list';
-import CustomStore from 'devextreme/data/custom_store';
+import { TreeList, Column, Editing, ValidationRule } from 'devextreme-react/tree-list';
 
 import 'whatwg-fetch';
 import './category-view.css';
@@ -17,7 +16,6 @@ const popupOptions = {
   showTitle: true,
   width: 700,
   height: 300,
-  position: { my: 'center', at: 'center', of: window },
 };
 
 export interface CategoryViewProps {

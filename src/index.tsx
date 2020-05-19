@@ -86,6 +86,7 @@ const getCookie = () => {
 
 const sessionLoadPromise = new Promise<SessionData>((resolve, reject) => {
   try {
+    console.log(`Cookie: ${inspect(getCookie())}`);
     let sessionData = extractSessionData(getCookie());
     if (sessionData && sessionData.sessionId) {
       console.log(`Extracted session ${sessionData.sessionId} from a coockie.`);
@@ -107,7 +108,7 @@ const sessionLoadPromise = new Promise<SessionData>((resolve, reject) => {
         })
       );
     } else {
-      console.log(`Could not extend session ${sessionData.sessionId}.`);
+      console.log(`Could extract session data from a cookie.`);
       resolve({});
     }
   } catch (e) {
