@@ -20,18 +20,19 @@ export interface MainMenyItem {
 }
 
 export interface TopMenuItem {
-  text: string;
+  text?: string;
   type: TreeMenuItemType;
   items?: TopMenuItem[];
+  icon?: any;
   onClick: () => void;
 }
 
-export const categoriesMenuItem = {
-  text: 'Categories',
-  expanded: false,
-  element: TreeMenuItemType.Categories,
-  items: [],
-};
+// export const categoriesMenuItem = {
+//   text: 'Categories',
+//   expanded: false,
+//   element: TreeMenuItemType.Categories,
+//   items: [],
+// };
 
 const businessesMenuItem = {
   text: 'Businesses',
@@ -71,19 +72,19 @@ const myAccountMenuItem = {
   items: [signOutMenuItem],
 };
 
-export const menuItemsSource: MainMenyItem[] = [
-  spendingsMenuItem,
-  {
-    // id: '1',
-    text: 'Transactions',
-    expanded: false,
-    element: TreeMenuItemType.Transactions,
-  },
-  categoriesMenuItem,
-  accountsMenuItem,
-  businessesMenuItem,
-  myAccountMenuItem,
-];
+// export const menuItemsSource: MainMenyItem[] = [
+//   spendingsMenuItem,
+//   {
+//     // id: '1',
+//     text: 'Transactions',
+//     expanded: false,
+//     element: TreeMenuItemType.Transactions,
+//   },
+//   categoriesMenuItem,
+//   accountsMenuItem,
+//   businessesMenuItem,
+//   myAccountMenuItem,
+// ];
 
 export interface category {
   caption: string;

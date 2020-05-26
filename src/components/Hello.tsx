@@ -13,11 +13,10 @@ import { LoadIndicator, Menu } from 'devextreme-react';
 import { Props } from '../containers/Hello';
 import BankConnectionsViewElement from '../containers/BankConnections';
 import AnnualTrendsViewElement from '../containers/AnnualTrendsView';
-import { TreeMenuItemType, MainMenyItem, TopMenuItem, menuItemsSource, categoriesMenuItem } from './model';
-import { categoriesReadDataSource } from './categoriesReadDataSource';
+import { TreeMenuItemType, TopMenuItem } from './model';
 
 interface MainMenuState {
-  selectedMenuItem: MainMenyItem;
+  // selectedMenuItem: MainMenyItem;
   topMenuSelectedItemType: TreeMenuItemType;
   userId?: number;
   loginInProgress: false;
@@ -28,7 +27,6 @@ export class Hello extends React.Component<Props, MainMenuState> {
     super(props);
 
     this.state = {
-      selectedMenuItem: menuItemsSource[0],
       loginInProgress: false,
       topMenuSelectedItemType: TreeMenuItemType.Spendings,
     };
@@ -52,6 +50,7 @@ export class Hello extends React.Component<Props, MainMenuState> {
   topManageBankAccountsMenuItem: TopMenuItem = {
     text: 'Manage Bank Accounts',
     type: TreeMenuItemType.Accounts,
+    // icon: 'user',
     onClick: () => {
       this.handleTopMenuSelectionChange(this.topManageBankAccountsMenuItem);
     },
@@ -74,7 +73,8 @@ export class Hello extends React.Component<Props, MainMenuState> {
   };
 
   topMyAccountMenuItem: TopMenuItem = {
-    text: 'My Account',
+    // text: 'My Account',
+    icon: 'user',
     type: TreeMenuItemType.ManageAccount,
     onClick: () => {},
     items: [
@@ -146,22 +146,22 @@ export class Hello extends React.Component<Props, MainMenuState> {
   topMenuItems = [this.topSpendingsMenuItem, this.topTransactionsMenuItem, this.topMyAccountMenuItem];
 
   render() {
-    if (this.props && this.props.userId) {
-      const userId = this.props.userId;
-      if (!this.customStore) {
-        this.customStore = {
-          store: new CustomStore({
-            load: function () {
-              const categoriesStore = categoriesReadDataSource(userId);
-              return categoriesStore.store.load().then((items) => {
-                categoriesMenuItem.items = items;
-                return menuItemsSource;
-              });
-            },
-          }),
-        };
-      }
-    }
+    // if (this.props && this.props.userId) {
+    //   const userId = this.props.userId;
+    //   if (!this.customStore) {
+    //     this.customStore = {
+    //       store: new CustomStore({
+    //         load: function () {
+    //           const categoriesStore = categoriesReadDataSource(userId);
+    //           return categoriesStore.store.load().then((items) => {
+    //             categoriesMenuItem.items = items;
+    //             return menuItemsSource;
+    //           });
+    //         },
+    //       }),
+    //     };
+    //   }
+    // }
 
     return (
       <div>
@@ -169,7 +169,7 @@ export class Hello extends React.Component<Props, MainMenuState> {
           <div>
             <div className="top-menu">
               <Menu
-                height={30}
+                height={35}
                 dataSource={this.topMenuItems}
                 displayExpr="text"
                 showFirstSubmenuMode={{
