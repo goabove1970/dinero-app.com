@@ -1,5 +1,5 @@
 export default {
-  serviceUrl: 'dinero-main-api.us-east-2.elasticbeanstalk.com',
+  serviceUrl: 'mi-dinero-app.uc.r.appspot.com',
   port: undefined,
 };
 // export default {
