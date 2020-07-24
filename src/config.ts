@@ -6,5 +6,5 @@
 // * Digital Ocean hosting
 export default {
   serviceUrl: 'www.dinero-app.com',
-  port: 9000,
+  port: undefined,
 };
