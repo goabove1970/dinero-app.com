@@ -1,8 +1,10 @@
-export default {
-  serviceUrl: 'dinero-main-api.us-east-2.elasticbeanstalk.com',
-  port: undefined,
-};
+// // * Amazon hosting
 // export default {
-//   serviceUrl: 'localhost',
-//   port: 9000,
+//   serviceUrl: 'dinero-main-api.us-east-2.elasticbeanstalk.com',
+//   port: undefined,
 // };
+// * Digital Ocean hosting
+export default {
+  serviceUrl: 'www.dinero-app.com',
+  port: 9000,
+};
