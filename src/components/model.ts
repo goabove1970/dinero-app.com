@@ -27,65 +27,6 @@ export interface TopMenuItem {
   onClick: () => void;
 }
 
-// export const categoriesMenuItem = {
-//   text: 'Categories',
-//   expanded: false,
-//   element: TreeMenuItemType.Categories,
-//   items: [],
-// };
-
-const businessesMenuItem = {
-  text: 'Businesses',
-  expanded: false,
-  element: TreeMenuItemType.Businesses,
-  items: [],
-};
-
-const spendingsMenuItem = {
-  text: 'Spendings',
-  expanded: false,
-  element: TreeMenuItemType.Spendings,
-  items: [],
-};
-
-const accountsMenuItem = {
-  // id: '2',
-  text: 'Bank Accounts',
-  expanded: false,
-  element: TreeMenuItemType.Accounts,
-  items: [],
-};
-
-const signOutMenuItem = {
-  // id: '2',
-  text: 'Sign Out',
-  expanded: false,
-  element: TreeMenuItemType.SignOut,
-  items: [],
-};
-
-const myAccountMenuItem = {
-  // id: '2',
-  text: 'My Accounts',
-  expanded: false,
-  element: TreeMenuItemType.ManageAccount,
-  items: [signOutMenuItem],
-};
-
-// export const menuItemsSource: MainMenyItem[] = [
-//   spendingsMenuItem,
-//   {
-//     // id: '1',
-//     text: 'Transactions',
-//     expanded: false,
-//     element: TreeMenuItemType.Transactions,
-//   },
-//   categoriesMenuItem,
-//   accountsMenuItem,
-//   businessesMenuItem,
-//   myAccountMenuItem,
-// ];
-
 export interface category {
   caption: string;
   categoryId: string;

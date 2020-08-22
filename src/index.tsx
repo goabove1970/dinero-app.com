@@ -10,7 +10,7 @@ import { StoreState, SessionData } from './types/index';
 import CONFIG from './config';
 
 import './index.css';
-import { sessionDataLoaded } from './actions';
+import { sessionDataLoaded, AuthActions } from './actions/loginActions';
 import { inspect } from 'util';
 
 const extractSessionData = (data?: string): SessionData => {
@@ -117,7 +117,7 @@ const sessionLoadPromise = new Promise<SessionData>((resolve, reject) => {
   }
 });
 
-export const store = createStore<StoreState>(storeReducer, {
+export const store = createStore<StoreState, AuthActions, any, any>(storeReducer, {
   session: {},
   loginInProgress: true,
 });

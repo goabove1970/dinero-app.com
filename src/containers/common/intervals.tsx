@@ -1,7 +1,6 @@
 import * as React from 'react';
 import * as moment from 'moment';
-
-import { Button } from 'devextreme-react';
+import { Button } from 'react-bootstrap';
 
 export enum TransactionIntervalType {
   thisMonth,
@@ -85,23 +84,25 @@ export const intervalButtons = [
   TransactionIntervalType.twelveMonths,
 ].map((m) => buildTransactionIntervalOption(m));
 
-export const renderIntervalButtonsRow = (selectedInterval: TransactionIntervalType | undefined, onClick: any) => {
+export const renderIntervalButtonsRow = (selectedInterval: TransactionIntervalType | undefined, _onClick: any) => {
   return (
     <div className="interval-buttons-row">
       <div className="buttons">
         {intervalButtons.map((button) => {
+          const isSelected = selectedInterval === button!.intervalType;
           return (
             <div key={button!.intervalType}>
               <div className="buttons-column">
                 <div>
                   <Button
-                    text={button!.caption}
-                    type={selectedInterval === button!.intervalType ? 'default' : 'normal'}
-                    stylingMode="contained"
-                    onClick={onClick}
-                    elementAttr={button}
+                    variant={isSelected ? 'primary' : 'outline-primary'}
+                    onClick={_onClick}
+                    size="sm"
+                    data-elementattr={JSON.stringify(button)}
                     key={button!.intervalType}
-                  />
+                  >
+                    {button!.caption}
+                  </Button>
                 </div>
               </div>
             </div>

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as moment from 'moment';
 
-import { Button } from 'devextreme-react';
+import { Button } from 'react-bootstrap';
 
 export interface TransactionIntervalSelectionOption {
   caption: string;
@@ -29,18 +29,19 @@ export const renderMonthsIntervalButtonsRow = (selectedMonth: Date | undefined, 
     <div className="interval-buttons-row">
       <div className="buttons">
         {buildMonthIntervalOptions(depth).map((button) => {
+
+          const isSelected = selectedMonth && moment(selectedMonth!).isSame(button!.startDate);
           return (
             <div key={button!.startDate!.toDateString()}>
               <div className="buttons-column">
                 <div>
                   <Button
-                    text={button!.caption}
-                    type={selectedMonth && moment(selectedMonth!).isSame(button!.startDate) ? 'default' : 'normal'}
-                    stylingMode="contained"
+                    variant={isSelected ? 'primary' : 'outline-primary'}
                     onClick={onClick}
-                    elementAttr={button}
+                    size="sm"
+                    data-elementattr={JSON.stringify(button)}
                     key={button!.startDate!.toDateString()}
-                  />
+                  >{button!.caption}</Button>
                 </div>
               </div>
             </div>

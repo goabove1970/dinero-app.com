@@ -23,7 +23,9 @@ import { buildCategoriesDataSource } from '../../dataSources/categoriesDataSourc
 import CustomStore from 'devextreme/data/custom_store';
 import { buildTransactionContextMenuDataSource, ContextMenuItem } from './transactionContextMenuDataSource';
 import { category, categoryTreeNode } from '../../contracts/categoryTreeNode';
-import { CheckBox, Accordion, FileUploader, LoadIndicator, Popup } from 'devextreme-react';
+import { CheckBox, FileUploader, LoadIndicator, Popup } from 'devextreme-react';
+
+import { Accordion, Card, Form, Button } from 'react-bootstrap';
 import { AccountResponseModel, Account } from '../../models/Account';
 import { buildAccountsDataSource } from '../../dataSources/accountsDataSource';
 import { inspect } from 'util';
@@ -31,17 +33,13 @@ import { renderMonthsIntervalButtonsRow } from '../common/months';
 import moment = require('moment');
 import { renderAccountsButtonsRow } from '../common/accountsRow';
 import { Transaction } from '../../models/transaction';
-// import { inspect } from 'util';
 
 const uploaderServiceUrl = 'http://localhost:9300/transactions/upload';
 
 export interface TransactionViewProps {
   userId?: string;
-}
-
-export interface AccordionItemWrapper {
-  title: string;
-  type: string;
+  transactionSearchPattern?: string;
+  clearTransactionSearch?: () => void;
 }
 
 export interface TransactionImportInfo {
@@ -55,7 +53,6 @@ export interface TransactionViewState {
   transactionsForMonth?: Date;
   selectedCategorizationType: TransactionCategorizationType;
   selectedAccountId?: string;
-  selectedAccordionItems: AccordionItemWrapper[];
   showHidden: false;
   showExcluded: false;
   selectedTransaction?: any;
@@ -64,6 +61,7 @@ export interface TransactionViewState {
   uploadTransactionPopupVisible?: boolean;
   transactionImportInfo?: TransactionImportInfo;
   selectedTransactions?: Transaction[];
+  searchTransactionsFilter?: string;
 }
 
 const categoryReadTransformation = (loadedCategories: category[]): categoryTreeNode[] => {
@@ -81,29 +79,24 @@ export class TransactionViewElement extends React.Component<TransactionViewProps
   categoriesStore: { store: CustomStore };
   transactionsStore: { store: CustomStore };
   acctDataStore: { store: CustomStore };
-  filteringOptionsAccordionItem: AccordionItemWrapper = {
-    title: 'Filtering Options',
-    type: 'filtering_options',
-  };
-  importAccordionItem: AccordionItemWrapper = {
-    title: 'Import Transactions',
-    type: 'import_transactions',
-  };
 
   constructor(props: TransactionViewProps) {
     super(props);
+    console.log(`props.transactionSearchPattern ${props.transactionSearchPattern}`);
 
     this.state = {
       selectedIntervalType: TransactionIntervalType.lastMonth,
       selectedCategorizationType: 'all',
       showHidden: false,
       showExcluded: false,
-      selectedAccordionItems: [],
-      // selectedAccordionItems: [this.filteringOptionsAccordionItem],
       accountsLoaded: false,
       accounts: [],
       uploadTransactionPopupVisible: false,
+      searchTransactionsFilter: props.transactionSearchPattern
     };
+
+    console.log(`this.state.searchTransactionsFilter ${this.state.searchTransactionsFilter}`);
+
     this.onMonthChanged = this.onMonthChanged.bind(this);
     this.onTransactionIntervalChanged = this.onTransactionIntervalChanged.bind(this);
     this.onTransactionCategorizationChanged = this.onTransactionCategorizationChanged.bind(this);
@@ -112,7 +105,6 @@ export class TransactionViewElement extends React.Component<TransactionViewProps
     this.onShowHiddenChanged = this.onShowHiddenChanged.bind(this);
     this.onShowExcludedChanged = this.onShowExcludedChanged.bind(this);
     this.buildTransactionContextMenuSource = this.buildTransactionContextMenuSource.bind(this);
-    this.accordionSelectionChanged = this.accordionSelectionChanged.bind(this);
     this.showTransactionImportInfo = this.showTransactionImportInfo.bind(this);
     this.hideTransactionImportInfo = this.hideTransactionImportInfo.bind(this);
     this.onTransactionImportComplete = this.onTransactionImportComplete.bind(this);
@@ -120,8 +112,22 @@ export class TransactionViewElement extends React.Component<TransactionViewProps
     this.transactionSelectionChanged = this.transactionSelectionChanged.bind(this);
   }
 
+
+  componentWillReceiveProps(nextProps: TransactionViewProps) {
+
+    // console.log(`this.state.searchTransactionsFilter ${this.state.searchTransactionsFilter}`);
+    // console.log(`nextProps.transactionSearchPattern ${nextProps.transactionSearchPattern}`);
+    this.setState({
+      ...this.state,
+      searchTransactionsFilter: nextProps.transactionSearchPattern,
+    });
+  }
+
   onTransactionIntervalChanged(e: any) {
-    const selectedIntervalData = e.component.option('elementAttr') as TransactionIntervalSelectionOption;
+    // console.log('onMonthChanged');
+    // console.log(inspect(e.target.dataset.elementattr));
+
+    const selectedIntervalData = JSON.parse(e.target.dataset.elementattr) as TransactionIntervalSelectionOption;
     notify(`Requesting transactions for ${selectedIntervalData.caption}`);
     this.setState({
       ...this.state,
@@ -131,7 +137,7 @@ export class TransactionViewElement extends React.Component<TransactionViewProps
   }
 
   onMonthChanged(e: any) {
-    const selectedIntervalData = e.component.option('elementAttr') as TransactionIntervalSelectionOption;
+    const selectedIntervalData = JSON.parse(e.target.dataset.elementattr) as TransactionIntervalSelectionOption;
     notify(`Requesting transactions for ${selectedIntervalData.caption}`);
     this.setState({
       ...this.state,
@@ -146,22 +152,20 @@ export class TransactionViewElement extends React.Component<TransactionViewProps
   }
 
   onTransactionCategorizationChanged(e: any) {
-    const selectedCategorizationData = e.component.option('elementAttr') as TransactionCategorizationSelectionOption;
+    const selectedCategorizationData = JSON.parse(e.target.dataset.elementattr) as TransactionCategorizationSelectionOption;
     notify(`Requesting transactions for ${selectedCategorizationData.caption}`);
     this.setState({
       ...this.state,
       selectedCategorizationType: selectedCategorizationData.categorizationType,
-      // selectedAccountId: undefined,
     });
   }
 
   onSelectedAccountChanged(e: any) {
-    const selectedAcctData = e.component.option('elementAttr') as Account;
+    const selectedAcctData = JSON.parse(e.target.dataset.elementattr) as Account;
     notify(`Requesting transactions for account ${selectedAcctData.alias}`);
     this.setState({
       ...this.state,
       selectedAccountId: selectedAcctData.accountId,
-      // selectedCategorizationType: 'all',
     });
   }
 
@@ -249,18 +253,6 @@ export class TransactionViewElement extends React.Component<TransactionViewProps
     });
   }
 
-  accordionSelectionChanged(e: any) {
-    // console.log(`accordionSelectionChanged: ${inspect(e)}`);
-    let newAccordionSelection = this.state.selectedAccordionItems;
-    e.addedItems.forEach((element: AccordionItemWrapper) => {
-      newAccordionSelection.push(element);
-    });
-    e.removedItems.forEach((element: AccordionItemWrapper) => {
-      newAccordionSelection = newAccordionSelection.filter((e) => e !== element);
-    });
-    this.setState({ ...this.state, selectedAccordionItems: newAccordionSelection });
-  }
-
   onShowExcludedChanged(e: any) {
     this.setState({
       ...this.state,
@@ -279,8 +271,8 @@ export class TransactionViewElement extends React.Component<TransactionViewProps
             <div className="dx-menu-item-popout"></div>
           </span>
         ) : (
-          <span />
-        )}
+            <span />
+          )}
       </div>
     );
   }
@@ -419,6 +411,8 @@ export class TransactionViewElement extends React.Component<TransactionViewProps
       endDate = moment(startDate).startOf('month').add(1, 'month').subtract(1, 'day').toDate();
     }
     this.categoriesStore = buildCategoriesDataSource(this.props.userId, categoryReadTransformation);
+
+    console.log(`this.state.searchTransactionsFilter ${this.state.searchTransactionsFilter}`);
     this.transactionsStore = buildTransactionDataSource({
       startDate,
       endDate,
@@ -427,141 +421,163 @@ export class TransactionViewElement extends React.Component<TransactionViewProps
       showExcluded: this.state.showExcluded,
       userId: this.props.userId,
       accountId: this.state.selectedAccountId,
+      transactionSearchPattern: this.state.searchTransactionsFilter,
     });
     const categoriesContextMenu = this.buildTransactionContextMenuSource(this.props.userId);
     this.acctDataStore = buildAccountsDataSource({ userId: this.props.userId });
     return (
-      <div className="transaction-content">
-        <div className="transactions-span">
-          <div className="caption">Transactions Filter</div>
-          {renderIntervalButtonsRow(this.state.selectedIntervalType, this.onTransactionIntervalChanged)}
-          {renderMonthsIntervalButtonsRow(this.state.transactionsForMonth, this.onMonthChanged, 6)}
-          {renderCategorizationButtonsRow(
-            this.state.selectedCategorizationType,
-            this.onTransactionCategorizationChanged
-          )}
-          {renderAccountsButtonsRow(this.state.accounts, this.state.selectedAccountId, this.onSelectedAccountChanged)}
+
+      <div>
+        {this.props.transactionSearchPattern !== undefined &&
+          <div className="transaction-search-dismiss">
+            <Button
+              size="sm"
+              variant={'outline-primary'}
+              onClick={() => {
+                if (this.props.clearTransactionSearch) {
+                  this.props.clearTransactionSearch();
+                }
+              }}>
+              {this.props.transactionSearchPattern} &times;
+            </Button>
+            <br />
+          </div>
+        }
+        <div className="filter-accordeon">
+          <Accordion defaultActiveKey="0">
+            <Card>
+              <Accordion.Toggle as={Card.Header} eventKey="0" size="sm">
+                Transaction Filter
+            </Accordion.Toggle>
+              <Accordion.Collapse eventKey="0">
+                <Form margin={"10px"}>
+                  {renderIntervalButtonsRow(this.state.selectedIntervalType, this.onTransactionIntervalChanged)}
+                  {renderMonthsIntervalButtonsRow(this.state.transactionsForMonth, this.onMonthChanged, 6)}
+                  {renderCategorizationButtonsRow(
+                    this.state.selectedCategorizationType,
+                    this.onTransactionCategorizationChanged
+                  )}
+                  {renderAccountsButtonsRow(this.state.accounts, this.state.selectedAccountId, this.onSelectedAccountChanged)}
+                </Form>
+              </Accordion.Collapse>
+            </Card>
+          </Accordion>
         </div>
-        <div className="transactions-grid">
-          <div className="caption">Transactions</div>
-          <DataGrid
-            key={'transactionId'}
-            dataSource={this.transactionsStore}
-            columnAutoWidth={true}
-            showBorders={true}
-            showRowLines={true}
-            selection={{ mode: 'multiple' }}
-            hoverStateEnabled={true}
-            onSelectionChanged={this.transactionSelectionChanged}
-            selectedRowKeys={(this.state.selectedTransactions || []).map((t) => t.transactionId)}
-          >
-            {/* <SearchPanel visible={true} width={240} placeholder="Search..." /> */}
-            <Sorting></Sorting>
-            {/* <Editing mode="row" allowUpdating={true} allowAdding={true}></Editing> */}
-            <Paging defaultPageSize={50} />
-            <Pager showPageSizeSelector={true} allowedPageSizes={[5, 10, 20, 100]} showInfo={true} />
-            <Column
-              dataField={'chaseTransaction.PostingDate'}
-              caption="Date"
-              dataType="date"
-              defaultSortOrder="desc"
-              sortOrder="desc"
-              sortIndex={0}
-              width={90}
-            />
-            <Column dataField={'importedDate'} caption="Imported" dataType="date" width={90} />
-            <Column
-              dataField={'chaseTransaction.Description'}
-              caption="Description"
-              width={500}
-              dataType="asc"
-              defaultSortOrder="asc"
-              sortIndex={1}
+        <div className="transaction-content">
+          <div className="transactions-grid">
+            <DataGrid
+              key={'transactionId'}
+              dataSource={this.transactionsStore}
+              columnAutoWidth={true}
+              showBorders={true}
+              showRowLines={true}
+              selection={{ mode: 'multiple' }}
+              hoverStateEnabled={true}
+              onSelectionChanged={this.transactionSelectionChanged}
+              selectedRowKeys={(this.state.selectedTransactions || []).map((t) => t.transactionId)}
             >
-              {/* <HeaderFilter allowSearch={true} /> */}
-            </Column>
-            <Column dataField={'chaseTransaction.BankDefinedCategory'} caption="Bank Category" width={100} />
-            <Column dataField={'chaseTransaction.CreditCardTransactionType'} caption="Spending Type" width={80} />
-            <Column dataField={'categoryId'} caption="Category" dataType="string" width={170}>
-              <Lookup dataSource={this.categoriesStore} valueExpr="categoryId" displayExpr="caption" />
-            </Column>
-            <Column dataField={'chaseTransaction.Amount'} caption="Amount" width={80} />
-            <Column dataField={'chaseTransaction.Balance'} caption="Balance" width={80} />
-          </DataGrid>
-        </div>
-        <div>
-          <Accordion
-            defaultSelectedIndex={0}
-            collapsible={true}
-            multiple={false}
-            items={[this.filteringOptionsAccordionItem, this.importAccordionItem]}
-            selectedItems={this.state.selectedAccordionItems}
-            itemTitleRender={(i: AccordionItemWrapper) => {
-              return i.title;
-            }}
-            onSelectionChanged={this.accordionSelectionChanged}
-            animationDuration={400}
-            itemRender={(props: any) => {
-              // console.log(`Rendering accordion item: ${inspect(props)}`);
-              switch (props.type) {
-                case 'import_transactions':
-                  return this.buildTransUploaderBlock();
-                case 'filtering_options':
-                  return (
-                    <div>
-                      <CheckBox
-                        value={this.state.showHidden}
-                        defaultValue={true}
-                        onValueChanged={this.onShowHiddenChanged}
-                        text="Show Hidden Transactions"
-                      />
-                      <CheckBox
-                        value={this.state.showExcluded}
-                        defaultValue={true}
-                        onValueChanged={this.onShowExcludedChanged}
-                        text="Show Excluded Transactions"
-                      />
-                    </div>
-                  );
-              }
+              <Sorting></Sorting>
+              <Paging defaultPageSize={50} />
+              <Pager showPageSizeSelector={true} allowedPageSizes={[5, 10, 20, 100]} showInfo={true} />
+              <Column
+                dataField={'chaseTransaction.PostingDate'}
+                caption="Date"
+                dataType="date"
+                defaultSortOrder="desc"
+                sortOrder="desc"
+                sortIndex={0}
+                width={90}
+              />
+              <Column dataField={'importedDate'} caption="Imported" dataType="date" width={90} />
+              <Column
+                dataField={'chaseTransaction.Description'}
+                caption="Description"
+                width={500}
+                dataType="asc"
+                defaultSortOrder="asc"
+                sortIndex={1}
+              >
+              </Column>
+              <Column dataField={'chaseTransaction.BankDefinedCategory'} caption="Bank Category" width={100} />
+              <Column dataField={'chaseTransaction.CreditCardTransactionType'} caption="Spending Type" width={80} />
+              <Column dataField={'categoryId'} caption="Category" dataType="string" width={170}>
+                <Lookup dataSource={this.categoriesStore} valueExpr="categoryId" displayExpr="caption" />
+              </Column>
+              <Column dataField={'chaseTransaction.Amount'} caption="Amount" width={80} />
+              <Column dataField={'chaseTransaction.Balance'} caption="Balance" width={80} />
+            </DataGrid>
+          </div>
+
+          <Accordion>
+            <Card>
+              <Accordion.Toggle as={Card.Header} eventKey="0" size="sm">
+                Upload Transactions
+              </Accordion.Toggle>
+              <Accordion.Collapse eventKey="0">
+                <Form>
+                  {this.buildTransUploaderBlock()}
+                </Form>
+              </Accordion.Collapse>
+            </Card>
+            <Card>
+              <Accordion.Toggle as={Card.Header} eventKey="1" size="sm">
+                Transaction Options
+              </Accordion.Toggle>
+              <Accordion.Collapse eventKey="1">
+                <Form>
+                  <CheckBox
+                    value={this.state.showHidden}
+                    defaultValue={true}
+                    onValueChanged={this.onShowHiddenChanged}
+                    text="Show Hidden Transactions"
+                  />
+                  <CheckBox
+                    value={this.state.showExcluded}
+                    defaultValue={true}
+                    onValueChanged={this.onShowExcludedChanged}
+                    text="Show Excluded Transactions"
+                  />
+                </Form>
+              </Accordion.Collapse>
+            </Card>
+          </Accordion>
+          <ContextMenu
+            dataSource={categoriesContextMenu}
+            width={200}
+            target=".dx-data-row"
+            onItemClick={this.contextMenuItemClick}
+            //itemRender={this.contextMenuItemRender}
+            animation={{
+              show: { type: 'fade', from: 0, to: 1, duration: 100 },
+              hide: { type: 'fade', from: 1, to: 0, duration: 100 },
             }}
           />
-        </div>
-        <ContextMenu
-          dataSource={categoriesContextMenu}
-          width={200}
-          target=".dx-data-row"
-          onItemClick={this.contextMenuItemClick}
-          //itemRender={this.contextMenuItemRender}
-          animation={{
-            show: { type: 'fade', from: 0, to: 1, duration: 100 },
-            hide: { type: 'fade', from: 1, to: 0, duration: 100 },
-          }}
-        />
-        {this.state.transactionImportInfo && (
-          <Popup
-            visible={this.state.uploadTransactionPopupVisible}
-            onHiding={this.hideTransactionImportInfo}
-            dragEnabled={false}
-            closeOnOutsideClick={true}
-            showTitle={true}
-            title="Transaction Import"
-            width={300}
-            height={250}
-          >
-            <p>
-              Recognized Transactions&nbsp;
+          {this.state.transactionImportInfo && (
+            <Popup
+              visible={this.state.uploadTransactionPopupVisible}
+              onHiding={this.hideTransactionImportInfo}
+              dragEnabled={false}
+              closeOnOutsideClick={true}
+              showTitle={true}
+              title="Transaction Import"
+              width={300}
+              height={250}
+            >
+              <p>
+                Recognized Transactions&nbsp;
               <span>{this.state.transactionImportInfo!.detected}</span>&nbsp;
             </p>
-            <p>
-              Merged Transaction: <span>{this.state.transactionImportInfo!.merged}</span>
-            </p>
-            <p>
-              Duplicates (skipped): <span>{this.state.transactionImportInfo!.duplicates}</span>
-            </p>
-          </Popup>
-        )}
-      </div>
+              <p>
+                Merged Transaction: <span>{this.state.transactionImportInfo!.merged}</span>
+              </p>
+              <p>
+                Duplicates (skipped): <span>{this.state.transactionImportInfo!.duplicates}</span>
+              </p>
+            </Popup>
+          )}
+        </div>
+      </div >
+
     );
   }
 }

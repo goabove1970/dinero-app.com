@@ -60,7 +60,7 @@ export class AnnualTrendsViewElement extends React.Component<AnnualTrendsViewPro
   }
 
   render(): JSX.Element {
-    console.log(`this.state.spendings: ${inspect(this.state.spendings && this.state.spendings.annualBalances)}`);
+    // console.log(`this.state.spendings: ${inspect(this.state.spendings && this.state.spendings.annualBalances)}`);
 
     return (
       <div className="spendings-content">

@@ -6,7 +6,7 @@
 
 .bank-connections-content > .caption {
   font-weight: 500;
-  margin-bottom: 20px;
+  /* margin-bottom: 20px; */
   font-size: 25px;
   font-family: 'Segoe UI Light', 'Helvetica Neue Light', 'Segoe UI', 'Helvetica Neue', 'Trebuchet MS', Verdana,
     sans-serif;

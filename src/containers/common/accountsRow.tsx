@@ -1,7 +1,9 @@
 import * as React from 'react';
 import 'devextreme/data/odata/store';
 import 'whatwg-fetch';
-import { Button, LoadIndicator } from 'devextreme-react';
+import { LoadIndicator } from 'devextreme-react';
+import { Button } from 'react-bootstrap';
+
 import { Account } from '../../models/Account';
 
 export type TransactionCategorizationType = 'uncategorized' | 'categorized' | 'all';
@@ -19,27 +21,27 @@ export const renderAccountsButtonsRow = (
   return accounts === undefined ? (
     <LoadIndicator id="large-indicator" height={60} width={60} />
   ) : (
-    <div className="interval-buttons-row">
-      <div className="buttons">
-        {accounts.map((acct) => {
-          return (
-            <div>
-              <div className="buttons-column">
-                <div>
-                  <Button
-                    text={acct!.alias}
-                    type={selectedAccountId === acct!.accountId ? 'success' : 'normal'}
-                    stylingMode="contained"
-                    onClick={onClick}
-                    elementAttr={acct}
-                    key={acct!.accountId}
-                  />
+      <div className="interval-buttons-row">
+        <div className="buttons">
+          {accounts.map((acct) => {
+            const isSelected = selectedAccountId === acct!.accountId;
+            return (
+              <div>
+                <div className="buttons-column">
+                  <div>
+                    <Button
+                      variant={isSelected ? 'info' : 'outline-info'}
+                      size="sm"
+                      onClick={onClick}
+                      data-elementattr={JSON.stringify(acct)}
+                      key={acct!.accountId}
+                    >{acct!.alias}</Button>
+                  </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
-    </div>
-  );
+    );
 };

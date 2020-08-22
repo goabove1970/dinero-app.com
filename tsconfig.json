@@ -3,17 +3,39 @@
     "outDir": "build/dist",
     "module": "commonjs",
     "target": "es6",
-    "lib": ["dom", "esnext", "dom.iterable", "scripthost"],
+    "lib": [
+      "dom",
+      "esnext",
+      "dom.iterable",
+      "scripthost"
+    ],
     "sourceMap": true,
     "allowJs": true,
     "jsx": "react",
     "moduleResolution": "node",
-    "rootDir": "src",
+    // "rootDir": "src",
     "noImplicitAny": false,
     "strictNullChecks": true,
-    "types": ["node"],
-    "typeRoots": ["node_modules/@types"]
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "types": [
+      "node",
+      "webpack-env"
+    ],
+    "typeRoots": [
+      "node_modules/@types"
+    ]
   },
-  "exclude": ["node_modules", "build", "scripts", "acceptance-tests", "webpack", "jest", "src/setupTests.ts"],
-  "types": ["typePatches"]
+  "exclude": [
+    "node_modules",
+    "build",
+    "scripts",
+    "acceptance-tests",
+    "webpack",
+    "jest",
+    "src/setupTests.ts"
+  ],
+  "types": [
+    "typePatches"
+  ]
 }

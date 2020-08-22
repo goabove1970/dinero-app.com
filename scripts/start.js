@@ -17,9 +17,8 @@ var checkRequiredFiles = require('react-dev-utils/checkRequiredFiles');
 var formatWebpackMessages = require('react-dev-utils/formatWebpackMessages');
 var getProcessForPort = require('react-dev-utils/getProcessForPort');
 var openBrowser = require('react-dev-utils/openBrowser');
-var prompt = require('react-dev-utils/prompt');
 var fs = require('fs');
-var config = require('../config/webpack.config.dev');
+var config = require('../webpack.config.dev');
 var paths = require('../config/paths');
 
 var useYarn = fs.existsSync(paths.yarnLockFile);
@@ -43,7 +42,7 @@ var handleCompile;
 // We only use this block for testing of Create React App itself:
 var isSmokeTest = process.argv.some(arg => arg.indexOf('--smoke-test') > -1);
 if (isSmokeTest) {
-  handleCompile = function(err, stats) {
+  handleCompile = function (err, stats) {
     if (err || stats.hasErrors() || stats.hasWarnings()) {
       process.exit(1);
     } else {
@@ -61,7 +60,7 @@ function setupCompiler(host, port, protocol) {
   // recompiling a bundle. WebpackDevServer takes care to pause serving the
   // bundle, so if you refresh, it'll wait instead of serving the old one.
   // "invalid" is short for "bundle invalidated", it doesn't imply any errors.
-  compiler.plugin('invalid', function() {
+  compiler.plugin('invalid', function () {
     if (isInteractive) {
       clearConsole();
     }
@@ -72,7 +71,7 @@ function setupCompiler(host, port, protocol) {
 
   // "done" event fires when Webpack has finished recompiling the bundle.
   // Whether or not you have warnings or errors, you will get this event.
-  compiler.plugin('done', function(stats) {
+  compiler.plugin('done', function (stats) {
     if (isInteractive) {
       clearConsole();
     }
@@ -132,22 +131,22 @@ function setupCompiler(host, port, protocol) {
 // We need to provide a custom onError function for httpProxyMiddleware.
 // It allows us to log custom error messages on the console.
 function onProxyError(proxy) {
-  return function(err, req, res) {
+  return function (err, req, res) {
     var host = req.headers && req.headers.host;
     console.log(
       chalk.red('Proxy error:') +
-        ' Could not proxy request ' +
-        chalk.cyan(req.url) +
-        ' from ' +
-        chalk.cyan(host) +
-        ' to ' +
-        chalk.cyan(proxy) +
-        '.'
+      ' Could not proxy request ' +
+      chalk.cyan(req.url) +
+      ' from ' +
+      chalk.cyan(host) +
+      ' to ' +
+      chalk.cyan(proxy) +
+      '.'
     );
     console.log(
       'See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (' +
-        chalk.cyan(err.code) +
-        ').'
+      chalk.cyan(err.code) +
+      ').'
     );
     console.log();
 
@@ -202,7 +201,7 @@ function addMiddleware(devServer) {
     var hpm = httpProxyMiddleware(pathname => mayProxy.test(pathname), {
       target: proxy,
       logLevel: 'verbose',
-      onProxyReq: function(proxyReq, req, res) {
+      onProxyReq: function (proxyReq, req, res) {
         // Browers may send Origin headers even with same-origin
         // requests. To prevent CORS issues, we have to change
         // the Origin to match the target URL.
@@ -312,16 +311,11 @@ detect(DEFAULT_PORT).then(port => {
     var question =
       chalk.yellow(
         'Something is already running on port ' +
-          DEFAULT_PORT +
-          '.' +
-          (existingProcess ? ' Probably:\n  ' + existingProcess : '')
+        DEFAULT_PORT +
+        '.' +
+        (existingProcess ? ' Probably:\n  ' + existingProcess : '')
       ) + '\n\nWould you like to run the app on another port instead?';
 
-    prompt(question, true).then(shouldChangePort => {
-      if (shouldChangePort) {
-        run(port);
-      }
-    });
   } else {
     console.log(chalk.red('Something is already running on port ' + DEFAULT_PORT + '.'));
   }

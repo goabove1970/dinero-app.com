@@ -1,26 +1,30 @@
-#pie {
+#pieChart {
   height: 400px;
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+}
+.pie {
+  padding: 10px;
+  background-color: rgba(223, 223, 223, 0.096);
+  color: rgb(119, 119, 119);
+  display: flex;
+  flex-wrap: wrap;
+  width: 48%;
 }
 
-.pie,
 .transactions,
 .annual-balances,
 .monthly-spendings,
-.transactions-span,
 .income-spendings {
-  padding: 20px;
   background-color: rgba(191, 191, 191, 0.15);
-  margin-top: 20px;
 }
 
 .transactions-span > .caption,
-.annual-balances > .caption,
-.monthly-spendings > .caption,
 .pie > .caption,
 .transactions > .caption,
 .income-spendings > .caption {
   font-weight: 500;
-  margin-bottom: 20px;
   font-size: 25px;
   font-family: 'Segoe UI Light', 'Helvetica Neue Light', 'Segoe UI', 'Helvetica Neue', 'Trebuchet MS', Verdana,
     sans-serif;
@@ -30,7 +34,6 @@
 }
 
 .spendings-content {
-  top: 0;
   height: 100%;
   text-align: left;
   font-size: 14px;
@@ -38,7 +41,6 @@
 
 .spendings-content .sub-title {
   font-size: 80%;
-  color: rgba(152, 152, 152, 0.8);
 }
 
 #app {
@@ -48,6 +50,18 @@
 .interval-buttons-row {
   width: 600px;
   align-self: left;
+  height: 30px;
+}
+
+.pie-row {
+  align-self: left;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: left;
+}
+
+.pie-break {
+  width: 10px;
 }
 
 .buttons {
@@ -58,13 +72,18 @@
 }
 
 .buttons-column > div {
-  /* width: 140px; */
-  height: 40px;
   text-align: center;
   margin-right: 5px;
 }
+.btn.btn-outline-primary.btn-sm,
+.btn.btn-primary.btn-sm,
+.btn.btn-outline-success.btn-sm,
+.btn.btn-success.btn-sm,
+.btn.btn-outline-info.btn-sm,
+.btn.btn-info.btn-sm {
+  line-height: 1;
+}
 
 .buttons-column {
-  /* width: 115px; */
   justify-content: center;
 }

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import 'devextreme/data/odata/store';
 import 'whatwg-fetch';
-import { Button } from 'devextreme-react';
+import { Button } from 'react-bootstrap';
 
 export type TransactionCategorizationType = 'uncategorized' | 'categorized' | 'all';
 
@@ -44,18 +44,18 @@ export const renderCategorizationButtonsRow = (selectedCategory: TransactionCate
     <div className="interval-buttons-row">
       <div className="buttons">
         {categoryButtons.map((button) => {
+          const isSelected = selectedCategory === button!.categorizationType;
           return (
             <div>
               <div className="buttons-column">
                 <div>
                   <Button
-                    text={button!.caption}
-                    type={selectedCategory === button!.categorizationType ? 'success' : 'normal'}
-                    stylingMode="contained"
+                    variant={isSelected ? 'success' : 'outline-success'}
                     onClick={onClick}
-                    elementAttr={button}
+                    size="sm"
+                    data-elementattr={JSON.stringify(button)}
                     key={button!.categorizationType}
-                  />
+                  >{button!.caption}</Button>
                 </div>
               </div>
             </div>

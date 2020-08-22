@@ -15,4 +15,5 @@ export interface StoreState {
   session?: SessionData;
   lastLoginData?: SessionData;
   loginInProgress?: boolean;
+  transactionSearchPattern?: string;
 }

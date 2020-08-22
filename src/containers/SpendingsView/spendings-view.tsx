@@ -108,7 +108,11 @@ export class SpendingsViewElement extends React.Component<SpendingsViewProps, Sp
   }
 
   onTransactionIntervalChanged(e: any) {
-    const selectedIntervalData = e.component.option('elementAttr') as TransactionIntervalSelectionOption;
+    // console.log('onTransactionIntervalChanged attrs');
+    // console.log(inspect(args1));
+    // console.log(inspect(e));
+    // console.log(inspect(e.target.dataset.elementattr));
+    const selectedIntervalData = JSON.parse(e.target.dataset.elementattr) as TransactionIntervalSelectionOption;
     // notify(`Requesting transactions for ${selectedIntervalData.caption}`);
     const newStartMonth = undefined;
     const newSelectedIntervalType = selectedIntervalData.intervalType;
@@ -124,8 +128,7 @@ export class SpendingsViewElement extends React.Component<SpendingsViewProps, Sp
   }
 
   onMonthIntervalChanged(e: any) {
-    const selectedIntervalData = e.component.option('elementAttr') as TransactionIntervalSelectionOption;
-    // notify(`Requesting transactions for ${selectedIntervalData.caption}`);
+    const selectedIntervalData = JSON.parse(e.target.dataset.elementattr) as TransactionIntervalSelectionOption;
     const newStartMonth = selectedIntervalData.startDate;
     const newSelectedIntervalType = undefined;
 
@@ -265,7 +268,7 @@ export class SpendingsViewElement extends React.Component<SpendingsViewProps, Sp
 
     source.store.load().then((res: SpendingServiceResponse) => {
       const data = this.categoryChanged(this.state.selectedCategoryId, res);
-      console.log(`SpendingServiceResponse: ${inspect(res)}`);
+      // console.log(`SpendingServiceResponse: ${inspect(res)}`);
       this.setState({
         ...this.state,
         spendings: res,
@@ -295,7 +298,7 @@ export class SpendingsViewElement extends React.Component<SpendingsViewProps, Sp
   }
 
   render(): JSX.Element {
-    console.log(`this.state.spendings: ${inspect(this.state.spendings && this.state.spendings.annualBalances)}`);
+    // console.log(`this.state.spendings: ${inspect(this.state.spendings && this.state.spendings.annualBalances)}`);
     // console.log(`transactions: ${inspect(this.state.transactions)}`);
     // console.log(`debitCategories: ${inspect(this.state.debitCategories)}`);
     // console.log(`this.state.spendings.spendingsByMonth: ${inspect(this.state.spendings.spendingsByMonth)}`);
@@ -303,43 +306,80 @@ export class SpendingsViewElement extends React.Component<SpendingsViewProps, Sp
     return (
       <div className="spendings-content">
         <div className="transactions-span">
-          <div className="caption">Select Period</div>
+          {/* <div className="caption">Select Period</div> */}
           {renderIntervalButtonsRow(this.state.selectedIntervalType, this.onTransactionIntervalChanged)}
           {renderMonthsIntervalButtonsRow(this.state.transactionsForMonth, this.onMonthIntervalChanged)}
         </div>
 
-        {this.state.debitCategories && this.state.debitCategories.length > 0 && (
-          <div className="pie">
-            <div className="caption">
-              {this.state.selectedCategoryName ? `${this.state.selectedCategoryName} Spedings` : `Spendings`}
+        <div className="pie-row">
+          {this.state.debitCategories && this.state.debitCategories.length > 0 && (
+            <div className="pie">
+              <div className="caption">
+                {this.state.selectedCategoryName ? `${this.state.selectedCategoryName} Spedings` : `Spendings`}
+              </div>
+              {!this.state.spendingsLoaded ? (
+                <LoadIndicator id="large-indicator" height={80} width={80}></LoadIndicator>
+              ) : (
+                  <PieChart
+                    id="pieChart"
+                    palette="Bright"
+                    dataSource={this.state.debitCategories}
+                    // title={this.state.selectedCategoryName ? `${this.state.selectedCategoryName} Spedings` : `Spendings`}
+                    onPointClick={this.onPiePointClick}
+                  >
+                    <Legend
+                      verticalAlignment="bottom"
+                      horizontalAlignment="center"
+                      itemTextPosition="right"
+                      // rowCount={5}
+                      columnCount={5}
+                    />
+                    <Series argumentField="name" valueField="debit">
+                      <Label visible={true} position="columns" customizeText={customizeText}>
+                        <Font size={11} />
+                        <Connector visible={true} width={0.2} />
+                      </Label>
+                    </Series>
+                  </PieChart>
+
+
+                )}
             </div>
-            {!this.state.spendingsLoaded ? (
-              <LoadIndicator id="large-indicator" height={80} width={80}></LoadIndicator>
-            ) : (
-              <PieChart
-                id="pie"
-                palette="Bright"
-                dataSource={this.state.debitCategories}
-                // title={this.state.selectedCategoryName ? `${this.state.selectedCategoryName} Spedings` : `Spendings`}
-                onPointClick={this.onPiePointClick}
-              >
-                <Legend
-                  orientation="horizontal"
-                  itemTextPosition="right"
-                  horizontalAlignment="center"
-                  verticalAlignment="bottom"
-                  columnCount={5}
-                />
-                <Series argumentField="name" valueField="debit">
-                  <Label visible={true} position="columns" customizeText={customizeText}>
-                    <Font size={16} />
-                    <Connector visible={true} width={0.5} />
-                  </Label>
-                </Series>
-              </PieChart>
-            )}
-          </div>
-        )}
+          )}
+          <div className="pie-break"></div>
+          {this.state.creditCategories && this.state.creditCategories.length > 0 && (
+            <div className="pie">
+              <div className="caption">
+                {this.state.selectedCategoryName ? `${this.state.selectedCategoryName} Income` : `Income`}
+              </div>
+              {!this.state.spendingsLoaded ? (
+                <LoadIndicator id="large-indicator" height={80} width={80}></LoadIndicator>
+              ) : (
+                  <PieChart
+                    id="pieChart"
+                    palette="Bright"
+                    dataSource={this.state.creditCategories}
+                    // title={this.state.selectedCategoryName ? `${this.state.selectedCategoryName} Income` : `Income`}
+                    onPointClick={this.onPiePointClick}
+                  >
+                    <Legend
+                      orientation="horizontal"
+                      itemTextPosition="right"
+                      horizontalAlignment="center"
+                      verticalAlignment="bottom"
+                      columnCount={5}
+                    />
+                    <Series argumentField="name" valueField="credit">
+                      <Label visible={true} position="columns" customizeText={customizeText}>
+                        <Font size={11} />
+                        <Connector visible={true} width={0.2} />
+                      </Label>
+                    </Series>
+                  </PieChart>
+                )}
+            </div>
+          )}
+        </div>
 
         {this.state.spendings && this.state.spendings.spendingsByMonth && (
           <div className="monthly-spendings">
@@ -352,168 +392,7 @@ export class SpendingsViewElement extends React.Component<SpendingsViewProps, Sp
           </div>
         )}
 
-        {/* Annual spendings by month, as a LINE (SALDO)*/}
-        {this.state.spendings && this.state.spendings.annualBalances && (
-          <div className="annual-balances">
-            <div className="caption">Monthly Balances</div>
-            <Chart
-              id="chart"
-              // title="Credit vs Debit, Monthly"
-              dataSource={this.state.spendings.annualBalances}
-              onPointClick={(e: any) => {
-                e.target.select();
-              }}
-            >
-              <CommonSeriesSettings
-                argumentField="month"
-                // type="bar"
-                hoverMode="allArgumentPoints"
-                selectionMode="allArgumentPoints"
-                type={'spline'}
-              >
-                <Label visible={true}>
-                  <Format type="fixedPoint" precision={0} />
-                </Label>
-              </CommonSeriesSettings>
-              {/* <Series valueField="credit" name="Credit" /> */}
-              {/* <Series valueField="debit" name="Debit" /> */}
-              <Series valueField="saldo" name="Blance" />
-              <Legend verticalAlignment="bottom" horizontalAlignment="center"></Legend>
-              <Tooltip enabled={true} />
-            </Chart>
-          </div>
-        )}
 
-        {/* Annual spendings by month, as a BAR (DEBIT, CREDIT)*/}
-        {this.state.spendings && this.state.spendings.annualBalances && (
-          <div className="annual-balances">
-            <div className="caption">Monthly Income vs Spendings</div>
-            <Chart
-              id="chart"
-              // title="Credit vs Debit, Monthly"
-              dataSource={this.state.spendings.annualBalances}
-              onPointClick={(e: any) => {
-                e.target.select();
-              }}
-            >
-              <CommonSeriesSettings
-                argumentField="month"
-                type="bar"
-                hoverMode="allArgumentPoints"
-                selectionMode="allArgumentPoints"
-                barPadding={2.9}
-
-                //type={'spline'}
-              >
-                {/* <Label visible={true}>
-                  <Format type="fixedPoint" precision={0} />
-                </Label> */}
-              </CommonSeriesSettings>
-              <Series valueField="credit" name="Credit" />
-              <Series valueField="debit" name="Debit" />
-              {/* <Series valueField="saldo" name="Blance" /> */}
-              <Legend verticalAlignment="bottom" horizontalAlignment="center"></Legend>
-              <Tooltip enabled={true} />
-            </Chart>
-          </div>
-        )}
-
-        {/* Cumulative debit vs credit LINE (DEBIT, CREDIT)*/}
-        {this.state.spendings && this.state.spendings.annualBalances && (
-          <div className="annual-balances">
-            <div className="caption">Cumulative Income vs Spendings</div>
-            <Chart
-              id="chart"
-              // title="Credit vs Debit, Monthly"
-              dataSource={this.state.spendings.annualBalances}
-              onPointClick={(e: any) => {
-                e.target.select();
-              }}
-            >
-              <CommonSeriesSettings
-                argumentField="month"
-                // type="bar"
-                hoverMode="allArgumentPoints"
-                selectionMode="allArgumentPoints"
-                type={'spline'}
-              >
-                <Label visible={true}>
-                  <Format type="fixedPoint" precision={0} />
-                </Label>
-              </CommonSeriesSettings>
-              <Series valueField="cumCredit" name="Credit" />
-              <Series valueField="cumDebit" name="Debit" />
-              {/* <Series valueField="saldo" name="Blance" /> */}
-              <Legend verticalAlignment="bottom" horizontalAlignment="center"></Legend>
-              <Tooltip enabled={true} />
-            </Chart>
-          </div>
-        )}
-
-        {/* Cumulative debit vs credit LINE (DEBIT, CREDIT)*/}
-        {this.state.spendings && this.state.spendings.annualBalances && (
-          <div className="annual-balances">
-            <div className="caption">Cumulative Balance</div>
-            <Chart
-              id="chart"
-              // title="Credit vs Debit, Monthly"
-              dataSource={this.state.spendings.annualBalances}
-              onPointClick={(e: any) => {
-                e.target.select();
-              }}
-            >
-              <CommonSeriesSettings
-                argumentField="month"
-                // type="bar"
-                hoverMode="allArgumentPoints"
-                selectionMode="allArgumentPoints"
-                type={'spline'}
-              >
-                <Label visible={true}>
-                  <Format type="fixedPoint" precision={0} />
-                </Label>
-              </CommonSeriesSettings>
-              {/* <Series valueField="cumCredit" name="Credit" /> */}
-              {/* <Series valueField="cumDebit" name="Debit" /> */}
-              <Series valueField="cumSaldo" name="Blance" />
-              <Legend verticalAlignment="bottom" horizontalAlignment="center"></Legend>
-              <Tooltip enabled={true} />
-            </Chart>
-          </div>
-        )}
-
-        {this.state.creditCategories && this.state.creditCategories.length > 0 && (
-          <div className="pie">
-            <div className="caption">
-              {this.state.selectedCategoryName ? `${this.state.selectedCategoryName} Income` : `Income`}
-            </div>
-            {!this.state.spendingsLoaded ? (
-              <LoadIndicator id="large-indicator" height={80} width={80}></LoadIndicator>
-            ) : (
-              <PieChart
-                id="pie"
-                palette="Bright"
-                dataSource={this.state.creditCategories}
-                // title={this.state.selectedCategoryName ? `${this.state.selectedCategoryName} Income` : `Income`}
-                onPointClick={this.onPiePointClick}
-              >
-                <Legend
-                  orientation="horizontal"
-                  itemTextPosition="right"
-                  horizontalAlignment="center"
-                  verticalAlignment="bottom"
-                  columnCount={5}
-                />
-                <Series argumentField="name" valueField="credit">
-                  <Label visible={true} position="columns" customizeText={customizeText}>
-                    <Font size={16} />
-                    <Connector visible={true} width={0.5} />
-                  </Label>
-                </Series>
-              </PieChart>
-            )}
-          </div>
-        )}
 
         {
           <div className="income-spendings">
@@ -522,32 +401,32 @@ export class SpendingsViewElement extends React.Component<SpendingsViewProps, Sp
               {!this.state.spendingsLoaded ? (
                 <LoadIndicator id="large-indicator" height={80} width={80}></LoadIndicator>
               ) : (
-                <Chart
-                  palette="Bright"
-                  dataSource={this.state.spendings.spendingProgression}
+                  <Chart
+                    palette="Bright"
+                    dataSource={this.state.spendings.spendingProgression}
                   // title="Income / Spendings"
-                >
-                  <CommonSeriesSettings argumentField="date" type={'spline'} />
-                  <CommonAxisSettings>
-                    <Grid visible={true} />
-                  </CommonAxisSettings>
-                  {this.spendingsLines.map(function (item) {
-                    return (
-                      <Series
-                        key={item.value}
-                        valueField={item.value}
-                        name={item.name}
-                        color={item.color}
-                        point={{ size: 0 }}
-                      />
-                    );
-                  })}
-                  {/* <Margin bottom={20} /> */}
-                  <ArgumentAxis allowDecimals={false} axisDivisionFactor={60}></ArgumentAxis>
-                  <Legend verticalAlignment="top" horizontalAlignment="right" />
-                  <Tooltip enabled={true} />
-                </Chart>
-              )}
+                  >
+                    <CommonSeriesSettings argumentField="date" type={'spline'} />
+                    <CommonAxisSettings>
+                      <Grid visible={true} />
+                    </CommonAxisSettings>
+                    {this.spendingsLines.map(function (item) {
+                      return (
+                        <Series
+                          key={item.value}
+                          valueField={item.value}
+                          name={item.name}
+                          color={item.color}
+                          point={{ size: 0 }}
+                        />
+                      );
+                    })}
+                    {/* <Margin bottom={20} /> */}
+                    <ArgumentAxis allowDecimals={false} axisDivisionFactor={60}></ArgumentAxis>
+                    <Legend verticalAlignment="top" horizontalAlignment="right" />
+                    <Tooltip enabled={true} />
+                  </Chart>
+                )}
             </div>
           </div>
         }
@@ -559,6 +438,7 @@ export class SpendingsViewElement extends React.Component<SpendingsViewProps, Sp
 function customizeText(arg: any) {
   // console.log(`customizeText, arg: ${inspect(arg)}`);
   return `${arg.argumentText}, $${Math.floor(arg.valueText)} (${arg.percentText})`;
+  // return `${Math.floor(arg.valueText)} (${arg.percentText})`;
 }
 
 export class TransactionContextMenuSource {

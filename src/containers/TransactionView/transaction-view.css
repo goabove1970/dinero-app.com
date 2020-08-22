@@ -1,14 +1,34 @@
 .transactions-grid,
 .transactions-span {
-  padding: 20px;
+  /* padding: 20px; */
   /* background-color: rgba(191, 191, 191, 0.15); */
-  margin-top: 20px;
+  margin-top: 15px;
+}
+
+.accordion > .card > .card-header {
+  padding: 8px;
+  padding-bottom: 3px;
+  font-size: 15px;
+}
+
+.filter-accordeon {
+  margin-top: 10px;
+}
+.accordion > .card > .collapse,
+.accordion > .card > .collapsing
+{
+  padding: 8px;
+}
+
+.transaction-search-dismiss {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 10px;
 }
 
 .transactions-grid > .caption,
 .transactions-span > .caption {
-  font-weight: 500;
-  margin-bottom: 20px;
+  /* margin-bottom: 20px; */
   font-size: 15px;
   font-family: 'Segoe UI Light', 'Helvetica Neue Light', 'Segoe UI', 'Helvetica Neue', 'Trebuchet MS', Verdana,
     sans-serif;
@@ -20,6 +40,7 @@
 .interval-buttons-row {
   width: 800px;
   align-self: left;
+  margin: 0px;
 }
 
 .transaction-file-import {
@@ -43,4 +64,15 @@
 
 .buttons-column {
   justify-content: center;
+}
+
+.dx-row.dx-data-row.dx-row-lines.dx-column-lines {
+  line-height: 11px;
+  font-size: 13px;
+}
+
+.dx-command-select.dx-cell-focus-disabled.dx-editor-cell.dx-editor-inline-block {
+  width: 40px;
+  min-width: 40px;
+  max-width: 40px;
 }

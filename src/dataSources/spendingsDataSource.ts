@@ -38,7 +38,7 @@ export const buildSpendingsDataSource = (args: SpendingsRequestArgs) => {
           },
         };
 
-        console.log(`Spending request: ${inspect(options)}`);
+        // console.log(`Spending request: ${inspect(options)}`);
         return new Promise((resolve, reject) => {
           const req = http.request(options, (res) => {
             let buffer: Buffer;
@@ -52,7 +52,7 @@ export const buildSpendingsDataSource = (args: SpendingsRequestArgs) => {
 
             res.on('end', () => {
               const data = JSON.parse(buffer.toString());
-              console.info(`Spendings response: ${inspect(data)}`);
+              // console.info(`Spendings response: ${inspect(data)}`);
               const response = {
                 parentCategories: data.categories,
                 subCatgories: data.subCatgories,
@@ -76,7 +76,7 @@ export const buildSpendingsDataSource = (args: SpendingsRequestArgs) => {
                   cumSaldo: 0,
                 };
               });
-              console.log(`Annual: ${inspect(annual)}`);
+              // console.log(`Annual: ${inspect(annual)}`);
               // sort annual asc
               annual.sort((a1: any, a2: any) => {
                 return moment(a1).isBefore(a2) ? -1 : 1;
@@ -84,7 +84,7 @@ export const buildSpendingsDataSource = (args: SpendingsRequestArgs) => {
               let cumDebit = 0;
               let cumCredit = 0;
               let cumSaldo = 0;
-              console.log(`annual.lenth = ${annual.lenth}`);
+              // console.log(`annual.lenth = ${annual.lenth}`);
 
               for (let i = 0; i < annual.length; ++i) {
                 cumDebit += annual[i].debit;
@@ -95,7 +95,7 @@ export const buildSpendingsDataSource = (args: SpendingsRequestArgs) => {
                 annual[i].cumSaldo = cumSaldo;
                 console.log(`annual[${i}].cumDebit: ${inspect(cumDebit)}`);
               }
-              console.log(`Annual1: ${inspect(annual)}`);
+              // console.log(`Annual1: ${inspect(annual)}`);
 
               resolve({
                 parentCategories: response.parentCategories,

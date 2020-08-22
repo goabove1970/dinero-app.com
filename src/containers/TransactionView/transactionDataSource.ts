@@ -17,6 +17,7 @@ export interface TransactionRequestArgs {
   accountId?: string;
   userId?: string;
   categoryId?: string;
+  transactionSearchPattern?: string;
 }
 
 export const buildTransactionDataSource = (args: TransactionRequestArgs) => {
@@ -85,7 +86,7 @@ export const buildTransactionDataSource = (args: TransactionRequestArgs) => {
       },
 
       load: function () {
-        // console.log(`loadOptions: ${JSON.stringify(args, null, 4)}`);
+        console.log(`loadOptions: ${JSON.stringify(args, null, 4)}`);
         const reqBody: any = {
           action: 'read-transactions',
           args: {
@@ -94,8 +95,13 @@ export const buildTransactionDataSource = (args: TransactionRequestArgs) => {
             endDate: args.endDate,
             categorization: args.categorization,
             categoryId: args.categoryId,
+            filter: args.transactionSearchPattern,
           },
         };
+
+        if (args.transactionSearchPattern === undefined) {
+          delete reqBody.args.filter;
+        }
 
         if (args.accountId) {
           reqBody.args = { ...reqBody.args, accountId: args.accountId };

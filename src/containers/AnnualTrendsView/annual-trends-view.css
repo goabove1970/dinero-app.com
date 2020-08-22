@@ -1,26 +1,25 @@
-#pie {
-  height: 400px;
-}
-
-.pie,
 .transactions,
 .annual-balances,
 .monthly-spendings,
-.transactions-span,
 .income-spendings {
-  padding: 20px;
+  padding: 10px;
   background-color: rgba(191, 191, 191, 0.15);
-  margin-top: 20px;
+  margin-top: 10px;
+}
+
+.transactions-span {
+  padding: 0px;
+  /* background-color: rgba(191, 191, 191, 0.15); */
+  /* margin-top: 20px; */
 }
 
 .transactions-span > .caption,
 .annual-balances > .caption,
 .monthly-spendings > .caption,
-.pie > .caption,
 .transactions > .caption,
 .income-spendings > .caption {
   font-weight: 500;
-  margin-bottom: 20px;
+  /* margin-bottom: 20px; */
   font-size: 25px;
   font-family: 'Segoe UI Light', 'Helvetica Neue Light', 'Segoe UI', 'Helvetica Neue', 'Trebuchet MS', Verdana,
     sans-serif;
